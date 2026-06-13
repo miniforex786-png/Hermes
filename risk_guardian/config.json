@@ -1,0 +1,61 @@
+{
+  "dimensions": {
+    "daily_loss": {
+      "warning_pct": 0.7,
+      "hard_limit": 2000.0,
+      "unit": "usd"
+    },
+    "weekly_loss": {
+      "warning_pct": 0.7,
+      "hard_limit": 5000.0,
+      "unit": "usd"
+    },
+    "monthly_loss": {
+      "warning_pct": 0.6,
+      "hard_limit": 15000.0,
+      "unit": "usd"
+    },
+    "max_layers": {
+      "warning_pct": 0.8,
+      "hard_limit": 5,
+      "unit": "count"
+    },
+    "campaign_drawdown": {
+      "warning_pct": 0.5,
+      "hard_limit": 0.10,
+      "unit": "pct"
+    },
+    "exposure_concentration": {
+      "warning_pct": 0.7,
+      "hard_limit": 0.50,
+      "unit": "ratio"
+    }
+  },
+  "campaign_guards": {
+    "probe": {
+      "max_layers": 3,
+      "basket_risk_cap_pct": 0.03,
+      "runner_max_hold_hours": 48,
+      "revenge_cooldown_minutes": 30,
+      "max_entries_per_hour": 4
+    },
+    "discretionary": {
+      "max_layers": 2,
+      "basket_risk_cap_pct": 0.05,
+      "runner_max_hold_hours": 168,
+      "revenge_cooldown_minutes": 60,
+      "max_entries_per_hour": 2
+    }
+  },
+  "escalation": {
+    "advisory_cooldown_minutes": 60,
+    "warning_cooldown_minutes": 30,
+    "critical_cooldown_minutes": 15,
+    "emergency_cooldown_minutes": 5
+  },
+  "notifications": {
+    "enabled": true,
+    "webhook_url": "",
+    "email": ""
+  }
+}
