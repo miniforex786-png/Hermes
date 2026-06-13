@@ -1,0 +1,199 @@
+{
+  "hold_times": {
+    "probe": {
+      "overall": {
+        "mean_hours": 0.15560754604872248,
+        "median_hours": 0.0958333333333333,
+        "std_hours": 0.18326149488712232,
+        "p25": 0.0372222222222222,
+        "p75": 0.18291666666666664,
+        "max_hours": 1.1255555555555554
+      },
+      "wins": {
+        "mean_hours": 0.1119531933508311,
+        "median_hours": 0.0822222222222222
+      },
+      "losses": {
+        "mean_hours": 0.24800925925925923,
+        "median_hours": 0.17111111111111105
+      }
+    },
+    "discretionary": {
+      "overall": {
+        "mean_hours": 5.886539682539683,
+        "median_hours": 0.5783333333333334,
+        "std_hours": 9.567151112620431,
+        "p25": 0.08888888888888882,
+        "p75": 7.661041666666667,
+        "max_hours": 32.19083333333334
+      },
+      "wins": {
+        "mean_hours": 1.266924603174603,
+        "median_hours": 0.20374999999999993
+      },
+      "losses": {
+        "mean_hours": 12.815962301587303,
+        "median_hours": 8.053888888888888
+      }
+    }
+  },
+  "sizing": {
+    "probe": {
+      "mean_size": 875.7745240641711,
+      "median_size": 836.0020000000001,
+      "std_size": 178.3917035590869,
+      "cv": 0.20369592704207903,
+      "min_size": 814.448,
+      "max_size": 1717.3680000000002,
+      "size_by_outcome": {
+        "wins": 892.4330393700787,
+        "losses": 840.5140000000002
+      }
+    },
+    "discretionary": {
+      "mean_size": 2069.177685714286,
+      "median_size": 842.7250000000001,
+      "std_size": 3761.3717963393356,
+      "cv": 1.8178099552822597,
+      "min_size": 813.3020000000001,
+      "max_size": 14829.804000000002,
+      "size_by_outcome": {
+        "wins": 1299.8767142857143,
+        "losses": 3223.129142857143
+      }
+    }
+  },
+  "revenge_trades": {
+    "probe": {
+      "total_trades": 186,
+      "revenge_count": 59,
+      "revenge_rate": 0.3172043010752688,
+      "revenge_pnl": -2569.0000000000005,
+      "revenge_win_rate": 0.3728813559322034,
+      "normal_win_rate": 0.8188976377952756
+    },
+    "discretionary": {
+      "total_trades": 69,
+      "revenge_count": 26,
+      "revenge_rate": 0.37681159420289856,
+      "revenge_pnl": -48672.59999999999,
+      "revenge_win_rate": 0.23076923076923078,
+      "normal_win_rate": 0.8372093023255814
+    }
+  },
+  "session_bias": {
+    "probe": {
+      "asian": {
+        "trades": 2,
+        "net_pnl": -27.0,
+        "win_rate": 0.5,
+        "avg_pnl": -13.5
+      },
+      "london": {
+        "trades": 57,
+        "net_pnl": 2760.6,
+        "win_rate": 0.6842105263157895,
+        "avg_pnl": 48.43157894736842
+      },
+      "ny": {
+        "trades": 128,
+        "net_pnl": 4122.8,
+        "win_rate": 0.6796875,
+        "avg_pnl": 32.209375
+      }
+    },
+    "discretionary": {
+      "asian": {
+        "trades": 8,
+        "net_pnl": 920.0,
+        "win_rate": 1.0,
+        "avg_pnl": 115.0
+      },
+      "london": {
+        "trades": 24,
+        "net_pnl": -10833.6,
+        "win_rate": 0.6666666666666666,
+        "avg_pnl": -451.40000000000003
+      },
+      "ny": {
+        "trades": 38,
+        "net_pnl": -67368.6,
+        "win_rate": 0.47368421052631576,
+        "avg_pnl": -1772.8578947368424
+      }
+    }
+  },
+  "streaks": {
+    "probe": {
+      "max_win_streak": "14",
+      "max_loss_streak": "10",
+      "avg_win_streak": 5.291666666666667,
+      "avg_loss_streak": 2.608695652173913,
+      "current_streak": "5",
+      "current_streak_type": "win"
+    },
+    "discretionary": {
+      "max_win_streak": "26",
+      "max_loss_streak": "13",
+      "avg_win_streak": 5.25,
+      "avg_loss_streak": 3.5,
+      "current_streak": "26",
+      "current_streak_type": "win"
+    }
+  },
+  "pnl_skew": {
+    "probe": {
+      "n_trades": 187,
+      "win_rate": 0.679144385026738,
+      "avg_win": 98.1543307086614,
+      "avg_loss": -93.48666666666666,
+      "avg_win_avg_loss_ratio": 1.049928660507681,
+      "expectancy_per_trade": 36.665240641711236,
+      "profit_factor": 2.2223489980745916,
+      "total_pnl": 6856.4000000000015,
+      "largest_win": 596.4,
+      "largest_loss": -376.0
+    },
+    "discretionary": {
+      "n_trades": 70,
+      "win_rate": 0.6,
+      "avg_win": 137.74285714285713,
+      "avg_loss": -2966.692857142857,
+      "avg_win_avg_loss_ratio": 0.04642976667140178,
+      "expectancy_per_trade": -1104.0314285714285,
+      "profit_factor": 0.06964465000710267,
+      "total_pnl": -77282.19999999998,
+      "largest_win": 1282.6,
+      "largest_loss": -7162.4
+    }
+  },
+  "campaigns": [
+    {
+      "campaign_id": "CAMPAIGN_001",
+      "type": "probe",
+      "n_trades": 187,
+      "net_pnl": 6856.400000000001,
+      "win_rate": 0.679144385026738,
+      "start_time": "2026-06-08 11:54:06+00:00",
+      "end_time": "2026-06-12 17:52:41+00:00",
+      "max_drawdown": 2054.0,
+      "avg_hold_hours": 0.15560754604872248,
+      "unique_setups": 2,
+      "duration_hours": 101.97638888888889
+    },
+    {
+      "campaign_id": "CAMPAIGN_002",
+      "type": "discretionary",
+      "n_trades": 70,
+      "net_pnl": -77282.2,
+      "win_rate": 0.6,
+      "start_time": "2026-06-09 08:16:05+00:00",
+      "end_time": "2026-06-12 20:01:55+00:00",
+      "max_drawdown": 80941.00000000001,
+      "avg_hold_hours": 5.886539682539682,
+      "unique_setups": 1,
+      "duration_hours": 83.76388888888889
+    }
+  ],
+  "generated_at": "2026-06-13T15:01:29.378353"
+}
