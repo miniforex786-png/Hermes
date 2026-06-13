@@ -541,6 +541,86 @@ async def check_setup_alerts():
     with open(state_file, 'w') as f:
         json.dump(last_notified, f)
 
+async def session_outlook():
+    """Send session outlook - market session context and expectations."""
+    config = load_config()
+    targets = config["targets"]
+    
+    con = load_latest_confluence()
+    risk = load_risk_state()
+    
+    # Determine current session
+    now = datetime.now()
+    hour = now.hour
+    
+    if 0 <= hour < 8:
+        session = "asian"
+        session_emoji = "🌙"
+        next_session = "london (08:00 UTC)"
+    elif 8 <= hour < 13:
+        session = "london"
+        session_emoji = "🌅"
+        next_session = "overlap (13:00 UTC)"
+    elif 13 <= hour < 16:
+        session = "overlap"
+        session_emoji = "⚡"
+        next_session = "ny (16:00 UTC)"
+    elif 16 <= hour < 21:
+        session = "ny"
+        session_emoji = "🗽"
+        next_session = "asian (00:00 UTC)"
+    else:
+        session = "asian"
+        session_emoji = "🌙"
+        next_session = "london (08:00 UTC)"
+    
+    # Session characteristics
+    session_info = {
+        "asian": "Range-bound, lower volatility, JPY/AUD active",
+        "london": "Trend initiation, EUR/GBP active, high volume",
+        "overlap": "Highest volume, major moves, breakout potential",
+        "ny": "Trend continuation, USD active, news-driven",
+    }
+    
+    lines = [
+        f"{session_emoji} **Session Outlook — {session.upper()}**",
+        f"⏰ {datetime.now().strftime('%H:%M UTC')} | Next: {next_session}",
+        "",
+        f"📋 **{session.capitalize()} Session Profile:**",
+        f"  {session_info.get(session, 'N/A')}",
+        "",
+    ]
+    
+    # Add confluence context
+    if "error" not in con:
+        lines.append("🎯 **Confluence Context:**")
+        lines.append(f"  Score: {con['score']:.0f} ({con['tier']})")
+        if con.get("active_setups"):
+            actives = [s for s in con["active_setups"] if s]
+            if actives:
+                lines.append(f"  Active: {', '.join(actives)}")
+    
+    # Add risk context
+    if "error" not in risk:
+        level = risk.get("overall_level", "ADVISORY")
+        if level in ["WARNING", "CRITICAL", "EMERGENCY"]:
+            lines.append("")
+            lines.append(f"🛡 **Risk: {level}** — Adjust sizing/caution")
+    
+    lines.append("")
+    lines.append("💡 **Key Levels to Watch:**")
+    lines.append("  • H4/H1 structure breaks")
+    lines.append("  • D1 trend alignment")
+    lines.append("  • Session open/close reactions")
+    
+    message = "\n".join(lines)
+    
+    try:
+        send_telegram_message(targets["primary_dm"], message)
+        print(f"Session outlook sent to {targets['primary_dm']}")
+    except Exception as e:
+        print(f"Error sending session outlook: {e}")
+
 # ============ MAIN ============
 async def run_cron_jobs():
     print(f"[{datetime.now()}] Running cron jobs...")
