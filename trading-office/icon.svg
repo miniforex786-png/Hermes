@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e14"/>
+      <stop offset="100%" style="stop-color:#111820"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4aa"/>
+      <stop offset="100%" style="stop-color:#00b894"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="32" fill="url(#bg)"/>
+  <!-- Hexagon shape -->
+  <polygon points="96,24 160,52 160,108 96,136 32,108 32,52" fill="none" stroke="url(#accent)" stroke-width="6"/>
+  <!-- Inner hexagon -->
+  <polygon points="96,48 136,68 136,100 96,120 56,100 56,68" fill="url(#accent)" opacity="0.2"/>
+  <!-- Center dot -->
+  <circle cx="96" cy="96" r="16" fill="url(#accent)"/>
+  <!-- Crosshair lines -->
+  <line x1="96" y1="56" x2="96" y2="136" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <line x1="56" y1="96" x2="136" y2="96" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+</svg>
