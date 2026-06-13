@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+MT5.lnk
+
+# MT5 data (large binary files — regenerate with scripts/extract_mt5_data.py)
