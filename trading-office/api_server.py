@@ -20,8 +20,8 @@ import uvicorn
 
 # Configuration
 API_KEY = os.getenv("HERMES_API_KEY", "hermes-trading-office-2024")  # Set in production
-DATA_ROOT = Path(__file__).parent.parent
-STATIC_DIR = DATA_ROOT / "trading-office"
+DATA_ROOT = Path(__file__).parent  # Railway rootDirectory=trading-office puts files at /app
+STATIC_DIR = DATA_ROOT  # index.html is in same folder
 
 app = FastAPI(
     title="Hermes Trading Office API",
