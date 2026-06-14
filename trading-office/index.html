@@ -162,9 +162,34 @@
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: auto auto auto;
+      grid-template-rows: auto auto auto auto;
       gap: 1.5rem;
       position: relative;
+    }
+
+      .desk-observer { grid-column: 1; grid-row: 1; }
+      .desk-journal { grid-column: 1; grid-row: 2; }
+      .desk-coach { grid-column: 1; grid-row: 3; }
+      .desk-analyst { grid-column: 10; grid-row: 1; }
+      .desk-researcher { grid-column: 10; grid-row: 2; }
+      .desk-auto { grid-column: 10; grid-row: 3; }
+      .central-screen {
+        grid-column: 2 / 10;
+        grid-row: 1 / 2;
+        height: 60vh;
+        min-height: 420px;
+        max-height: 600px;
+      }
+      .desk-risk {
+        grid-column: 2 / 10;
+        grid-row: 3;
+      }
+      .desk-name { white-space: nowrap; overflow: visible; text-overflow: clip; min-width: 0; font-size: 0.85rem; font-weight: 600; }
+      .desk-role { white-space: nowrap; overflow: visible; text-overflow: clip; font-size: 0.7rem; color: var(--ink-muted); }
+      .desk-info { min-width: 0; }
+      .desk { min-width: 280px; min-height: 220px; }
+      .desk-monitors { min-width: 240px; }
+      .office-header { padding: 1rem 2rem; }
     }
 
     /* Central P&L Wall Screen */
@@ -283,6 +308,36 @@
     @keyframes statusBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .desk-monitors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+    /* Observer desk: stack monitors vertically */
+    .desk-observer .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Campaign Analyst desk: stack monitors vertically */
+    .desk-analyst .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Trading Journal desk: stack monitors vertically */
+    .desk-journal .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Pattern Researcher desk: stack monitors vertically */
+    .desk-researcher .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Trading Coach desk: stack monitors vertically */
+    .desk-coach .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Semi-Auto Assistant desk: stack monitors vertically */
+    .desk-auto .desk-monitors {
+      grid-template-columns: 1fr;
+    }
     .monitor {
       background: #080c10;
       border: 1px solid var(--panel-border);
@@ -325,7 +380,7 @@
     /* Central screen bottom row - additional stats */
     .central-bottom {
       grid-column: 3 / 11;
-      grid-row: 3;
+      grid-row: 2;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
@@ -469,9 +524,9 @@
       .desk-analyst { grid-column: 2; grid-row: 1; }
       .desk-researcher { grid-column: 2; grid-row: 2; }
       .central-screen { grid-column: 1 / 3; grid-row: 3; }
-      .desk-coach { grid-column: 1; grid-row: 4; }
+      .desk-coach { grid-column: 1; grid-row: 2; }
       .desk-risk { grid-column: 1 / 3; grid-row: 5; }
-      .desk-auto { grid-column: 2; grid-row: 4; }
+      .desk-auto { grid-column: 2; grid-row: 2; }
       .central-bottom { grid-column: 1 / 3; grid-row: 6; grid-template-columns: repeat(2, 1fr); }
       
       .chart-area { height: 80px; }
@@ -512,7 +567,78 @@
     .low-end .monitor-dot { animation: none; }
     .low-end .status-dot::before { animation: none; }
     .low-end .desk-status.alert { animation: none; }
-  </style>
+  
+    /* ===== DESKTOP ≥1400px: FIXED CENTRAL COLUMN, READABLE DESK LABELS ===== */
+    @media (min-width: 1400px) {
+      .floor-grid {
+        max-width: 1800px;
+        grid-template-columns: 280px repeat(8, 1fr) 280px;
+        grid-template-rows: 60vh auto auto auto;
+        align-content: start;
+        align-items: start;
+      }
+
+      /* Side columns fixed at 280px min-width */
+      .desk-observer { grid-column: 1; grid-row: 1; }
+      .desk-journal { grid-column: 1; grid-row: 2; }
+      .desk-coach { grid-column: 1; grid-row: 3; }
+      .desk-analyst { grid-column: 10; grid-row: 1; }
+      .desk-researcher { grid-column: 10; grid-row: 2; }
+      .desk-auto { grid-column: 10; grid-row: 3; }
+
+      /* Central P&L: columns 2-9 (8 columns), positioned higher */
+      .central-screen {
+        grid-column: 2 / 10;
+        grid-row: 1 / 2;
+        height: 60vh;
+        min-height: 420px;
+        max-height: 600px;
+      }
+
+      /* Risk Guardian spans center-bottom */
+      .desk-risk {
+        grid-column: 2 / 10;
+        grid-row: 3;
+      }
+
+      /* Central stats: between P&L and Risk Guardian */
+      .central-bottom {
+        grid-column: 2 / 10;
+        grid-row: 2;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        min-width: 0;
+      }
+
+      /* Desk labels: prevent truncation, ensure readability */
+      .desk-name {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        min-width: 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .desk-role {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        font-size: 0.7rem;
+        color: var(--ink-muted);
+      }
+      .desk-info { min-width: 0; }
+
+      /* Ensure desk content doesn't squish */
+      .desk {
+        min-width: 280px;
+        min-height: 220px;
+      }
+      .desk-monitors { min-width: 240px; }
+
+      /* Reduce header height on tall screens for more floor space */
+      .office-header { padding: 1rem 2rem; }
+    }
+</style>
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -675,7 +801,7 @@
         </article>
 
         <!-- Central P&L Screen -->
-        <section class="central-screen" aria-label="Daily P&L Dashboard">
+        <section class="central-screen" id="pnl" aria-label="Daily P&L Dashboard">
           <div class="screen-header">
             <div class="screen-title">DAILY P&L · SESSION OVERVIEW</div>
             <div class="screen-controls">
@@ -745,7 +871,7 @@
         </article>
 
         <!-- Desk: RISK GUARDIAN -->
-        <article class="desk desk-risk" data-module="risk">
+        <article class="desk desk-risk" id="risk" data-module="risk">
           <div class="desk-header">
             <div class="desk-avatar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -774,6 +900,8 @@
           </div>
           <div class="desk-action">▶ TRIGGER MANUAL REVIEW</div>
         </article>
+
+        <!-- Central P&L Screen -->
 
         <!-- Desk: SEMI-AUTOMATED ASSISTANT -->
         <article class="desk desk-auto" data-module="auto">

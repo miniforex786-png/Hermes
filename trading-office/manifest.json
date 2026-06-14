@@ -2,7 +2,7 @@
   "name": "Hermes Trading Office",
   "short_name": "Hermes Office",
   "description": "24/7 Campaign Intelligence - Trading surveillance, journal, analytics, and risk management",
-  "start_url": "./hermes-trading-office.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0e14",
   "theme_color": "#0a0e14",
@@ -22,14 +22,14 @@
       "name": "P&L Dashboard",
       "short_name": "P&L",
       "description": "View daily P&L overview",
-      "url": "./hermes-trading-office.html#pnl",
+      "url": "./index.html#pnl",
       "icons": [{ "src": "icon.svg", "sizes": "any" }]
     },
     {
       "name": "Risk Guardian",
       "short_name": "Risk",
       "description": "Check risk limits and escalation",
-      "url": "./hermes-trading-office.html#risk",
+      "url": "./index.html#risk",
       "icons": [{ "src": "icon.svg", "sizes": "any" }]
     }
   ],
