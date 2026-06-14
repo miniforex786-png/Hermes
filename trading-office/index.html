@@ -98,545 +98,513 @@
 
     /* Header */
     .office-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid var(--panel-border);
-      background: rgba(17, 24, 32, 0.8);
-      backdrop-filter: blur(20px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .header-content {
-      max-width: 1600px;
-      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 2rem;
+      padding: 16px 20px;
+      background: linear-gradient(180deg, rgba(10, 14, 20, 0.95) 0%, rgba(10, 14, 20, 0.7) 100%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--panel-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    .logo-group {
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
-    .logo-mark {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--info) 100%);
+    .logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--info));
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 30px var(--accent-glow);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+    .logo svg { width: 22px; height: 22px; stroke: #0a0e14; }
+
+    .header-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, var(--ink), var(--ink-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
     }
 
-    .logo-mark svg { width: 24px; height: 24px; stroke: var(--bg); }
-
-    .logo-text { display: flex; flex-direction: column; }
-    .logo-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
-    .logo-subtitle { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-
-    .status-indicators { display: flex; align-items: center; gap: 1.5rem; }
-    .status-dot { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--ink-muted); }
-    .status-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
-    .status-dot.warning::before { background: var(--warning); box-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
-    .status-dot.danger::before { background: var(--danger); box-shadow: 0 0 10px var(--danger-glow); animation: pulseDanger 0.5s ease-in-out infinite; }
-
-    /* Pipeline health indicator in header */
-    #pipelineStatus { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); }
-    #pipelineStatus .pipeline-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px rgba(46, 213, 115, 0.5); animation: pulse 2s ease-in-out infinite; }
-    #pipelineStatus.degraded .pipeline-indicator { background: var(--warning); box-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
-    #pipelineStatus.down .pipeline-indicator { background: var(--danger); box-shadow: 0 0 10px var(--danger-glow); animation: pulseDanger 0.5s ease-in-out infinite; }
-
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    @keyframes pulseDanger { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } }
-
-    .time-display { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--ink); }
-
-    /* Main office floor */
-    .office-floor {
+    .header-center {
       flex: 1;
-      padding: 2rem;
-      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
     }
 
-    .floor-grid {
-      max-width: 1600px;
-      margin: 0 auto;
+    .pipeline-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+    .pipeline-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .pipeline-dot.healthy { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .pipeline-dot.degraded { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .pipeline-dot.down { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .time-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      white-space: nowrap;
+    }
+
+    .pwa-install-btn {
+      display: none;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+      color: #0a0e14;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .pwa-install-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .pwa-install-btn:active { transform: translateY(0); }
+    @media (display-mode: browser) { .pwa-install-btn { display: block; } }
+    @media (display-mode: standalone) { .pwa-install-btn { display: none; } }
+
+    /* Main content */
+    .office-main {
+      flex: 1;
+      padding: 20px;
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: auto auto auto auto;
-      gap: 1.5rem;
-      position: relative;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 1800px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-      .desk-observer { grid-column: 1; grid-row: 1; }
-      .desk-journal { grid-column: 1; grid-row: 2; }
-      .desk-coach { grid-column: 1; grid-row: 3; }
-      .desk-analyst { grid-column: 10; grid-row: 1; }
-      .desk-researcher { grid-column: 10; grid-row: 2; }
-      .desk-auto { grid-column: 10; grid-row: 3; }
-      .central-screen {
-        grid-column: 2 / 10;
-        grid-row: 1 / 2;
-        height: 60vh;
-        min-height: 420px;
-        max-height: 600px;
-      }
-      .desk-risk {
-        grid-column: 2 / 10;
-        grid-row: 3;
-      }
-      .desk-name { white-space: nowrap; overflow: visible; text-overflow: clip; min-width: 0; font-size: 0.85rem; font-weight: 600; }
-      .desk-role { white-space: nowrap; overflow: visible; text-overflow: clip; font-size: 0.7rem; color: var(--ink-muted); }
-      .desk-info { min-width: 0; }
-      .desk { min-width: 280px; min-height: 220px; }
-      .desk-monitors { min-width: 240px; }
-      .office-header { padding: 1rem 2rem; }
+    /* Floor Grid - 7 Desks Layout */
+    .floor-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: start;
     }
 
-    /* Central P&L Wall Screen */
-    .central-screen {
-      grid-column: 3 / 11;
-      grid-row: 1 / 3;
+    @media (min-width: 768px) {
+      .floor-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .floor-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .desk-observer { grid-column: span 1; }
+      .desk-journal { grid-column: span 1; }
+      .desk-analyst { grid-column: span 1; }
+      .desk-researcher { grid-column: span 1; }
+      .desk-coach { grid-column: span 1; }
+      .desk-risk { grid-column: span 1; }
+    }
+
+    @media (min-width: 1600px) {
+      .floor-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+      }
+      .central-screen { grid-column: 1 / -1; }
+    }
+
+    /* Desk Base Styles */
+    .desk {
       background: var(--panel);
       border: 1px solid var(--panel-border);
       border-radius: 16px;
-      overflow: hidden;
+      padding: 20px;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+      cursor: pointer;
       position: relative;
-      box-shadow:
-        0 0 0 1px rgba(0, 212, 170, 0.1) inset,
-        0 20px 60px -20px rgba(0, 0, 0, 0.5),
-        0 0 100px -40px var(--accent-glow);
+      overflow: hidden;
+    }
+    .desk::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--info));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .desk:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .desk:hover::before { opacity: 1; }
+    .desk:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .desk-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .desk-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--bg-elevated), var(--panel));
+      border: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .desk-avatar svg { width: 22px; height: 22px; color: var(--accent); }
+
+    .desk-info { flex: 1; min-width: 0; }
+    .desk-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .desk-role {
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .desk-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .desk-status.busy { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid rgba(255, 71, 87, 0.3); }
+    .desk-status.idle { background: rgba(55, 66, 250, 0.15); color: var(--info); border: 1px solid rgba(55, 66, 250, 0.3); }
+    .desk-status.alert { background: rgba(255, 165, 2, 0.15); color: var(--warning); border: 1px solid rgba(255, 165, 2, 0.3); animation: statusPulse 2s ease-in-out infinite; }
+    @keyframes statusPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 165, 2, 0.4); } 50% { box-shadow: 0 0 0 6px rgba(255, 165, 2, 0); } }
+
+    .desk-monitors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .desk-monitors { grid-template-columns: 1fr; }
+    }
+
+    .monitor {
+      background: var(--bg-elevated);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px;
+      transition: border-color 0.2s;
+    }
+    .monitor:hover { border-color: var(--accent-dim); }
+
+    .monitor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .monitor-header span:first-child {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .monitor-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ink-dim);
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+    .monitor-dot.positive { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .monitor-dot.negative { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+    .monitor-dot.idle { background: var(--ink-dim); animation: none; }
+    @keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .monitor-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+    .monitor-row:not(:last-child) { border-bottom: 1px solid var(--panel-border); }
+
+    .monitor-label {
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+    .monitor-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: right;
+    }
+    .monitor-value.positive { color: var(--success); }
+    .monitor-value.negative { color: var(--danger); }
+    .monitor-value.warning { color: var(--warning); }
+
+    .desk-action {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      color: var(--ink-muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .desk-action:hover { border-color: var(--accent); color: var(--accent); background: rgba(0, 212, 170, 0.05); }
+    .desk-action:active { transform: scale(0.98); }
+    .desk-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Central P&L Screen */
+    .central-screen {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px;
     }
 
     .screen-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.5rem;
-      background: rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--panel-border);
     }
-
-    .screen-title { font-weight: 600; font-size: 0.95rem; }
-    .screen-controls { display: flex; gap: 0.5rem; }
-    .screen-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .screen-dot:nth-child(1) { background: var(--danger); }
-    .screen-dot:nth-child(2) { background: var(--warning); }
-    .screen-dot:nth-child(3) { background: var(--success); }
-
-    .screen-content { padding: 1.5rem; height: 100%; display: flex; flex-direction: column; }
+    .screen-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      color: var(--ink-muted);
+    }
+    .screen-controls { display: flex; gap: 6px; }
+    .screen-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 2px solid var(--panel-border);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .screen-dot:nth-child(1) { background: var(--success); border-color: var(--success); }
+    .screen-dot:nth-child(2) { background: var(--warning); border-color: var(--warning); }
+    .screen-dot:nth-child(3) { background: var(--info); border-color: var(--info); }
 
     .pnl-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       text-align: center;
     }
+    .pnl-label {
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+    }
+    .pnl-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .pnl-value.positive { color: var(--success); }
+    .pnl-value.negative { color: var(--danger); }
 
-    .pnl-label { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.5rem; }
-    .pnl-value { font-family: 'JetBrains Mono', monospace; font-size: clamp(3rem, 8vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
-    .pnl-value.positive { color: var(--accent); text-shadow: 0 0 40px var(--accent-glow); }
-    .pnl-value.negative { color: var(--danger); text-shadow: 0 0 40px var(--danger-glow); }
+    .pnl-sub {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) { .pnl-sub { grid-template-columns: repeat(4, 1fr); } }
 
-    .pnl-sub { display: flex; gap: 3rem; margin-top: 1.5rem; flex-wrap: wrap; justify-content: center; }
-    .pnl-stat { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
-    .pnl-stat-label { font-size: 0.65rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; }
-    .pnl-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 600; }
+    .pnl-stat {
+      background: var(--bg-elevated);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .pnl-stat-label {
+      font-size: 0.65rem;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 6px;
+    }
+    .pnl-stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .pnl-stat-value.positive { color: var(--success); }
+    .pnl-stat-value.negative { color: var(--danger); }
+    .pnl-stat-value.warning { color: var(--warning); }
 
     .chart-area {
       height: 120px;
-      width: 100%;
-      margin-top: 2rem;
-      position: relative;
-    }
-
-    .chart-canvas { width: 100%; height: 100%; }
-
-    /* Desk modules */
-    .desk {
-      background: var(--panel);
+      border-radius: 10px;
+      background: var(--bg-elevated);
       border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      position: relative;
+      overflow: hidden;
     }
+    .chart-canvas { width: 100%; height: 100%; display: block; }
 
-    .desk:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px -15px rgba(0, 0, 0, 0.5);
-      border-color: rgba(0, 212, 170, 0.3);
-    }
-
-    .desk::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--desk-color, var(--accent));
-      border-radius: 12px 12px 0 0;
-      opacity: 0.6;
-    }
-
-    .desk-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-    .desk-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--desk-color, var(--accent)) 0%, var(--desk-color-dark, var(--accent-dim)) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 4px 20px -5px var(--desk-color, var(--accent));
-    }
-    .desk-avatar svg { width: 24px; height: 24px; stroke: var(--bg); }
-
-    .desk-info { flex: 1; min-width: 0; }
-    .desk-name { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .desk-role { font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.125rem; }
-
-    .desk-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.625rem; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); border-radius: 999px; font-size: 0.65rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
-    .desk-status.busy { background: rgba(55, 66, 250, 0.1); border-color: rgba(55, 66, 250, 0.2); color: var(--info); }
-    .desk-status.warning { background: rgba(255, 165, 2, 0.1); border-color: rgba(255, 165, 2, 0.2); color: var(--warning); }
-    .desk-status.alert { background: rgba(255, 71, 87, 0.1); border-color: rgba(255, 71, 87, 0.2); color: var(--danger); animation: statusBlink 1s ease-in-out infinite; }
-
-    @keyframes statusBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-    .desk-monitors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-
-    /* Observer desk: stack monitors vertically */
-    .desk-observer .desk-monitors {
-      grid-template-columns: 1fr;
-    }
-
-    /* Campaign Analyst desk: stack monitors vertically */
-    .desk-analyst .desk-monitors {
-      grid-template-columns: 1fr;
-    }
-
-    /* Trading Journal desk: stack monitors vertically */
-    .desk-journal .desk-monitors {
-      grid-template-columns: 1fr;
-    }
-
-    /* Pattern Researcher desk: stack monitors vertically */
-    .desk-researcher .desk-monitors {
-      grid-template-columns: 1fr;
-    }
-
-    /* Trading Coach desk: stack monitors vertically */
-    .desk-coach .desk-monitors {
-      grid-template-columns: 1fr;
-    }
-    .monitor {
-      background: #080c10;
-      border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      line-height: 1.5;
-    }
-
-    .monitor-header { display: flex; align-items: center; justify-content: space-between; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.6rem; }
-    .monitor-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
-    .monitor-dot.idle { background: var(--ink-dim); box-shadow: none; animation: none; }
-
-    .monitor-row { display: flex; justify-content: space-between; gap: 1rem; }
-    .monitor-label { color: var(--ink-muted); }
-    .monitor-value { color: var(--ink); font-weight: 500; text-align: right; }
-    .monitor-value.positive { color: var(--accent); }
-    .monitor-value.negative { color: var(--danger); }
-    .monitor-value.warning { color: var(--warning); }
-
-    .monitor-bar { height: 4px; background: var(--panel-border); border-radius: 2px; overflow: hidden; }
-    .monitor-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--desk-color, var(--accent)), var(--desk-color-dark, var(--accent-dim))); transition: width 0.5s ease; }
-
-    .desk-action { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 8px; font-size: 0.7rem; color: var(--ink-muted); transition: all 0.2s ease; }
-    .desk-action:hover { background: rgba(0, 212, 170, 0.05); border-color: var(--accent); color: var(--accent); cursor: pointer; }
-
-    /* Specific desk positions */
-    .desk-observer { grid-column: 1 / 3; grid-row: 1; --desk-color: #00d4aa; --desk-color-dark: #00b894; }
-    .desk-journal { grid-column: 1 / 3; grid-row: 2; --desk-color: #3742fa; --desk-color-dark: #2d3ae8; }
-    .desk-analyst { grid-column: 11 / 13; grid-row: 1; --desk-color: #7c5cff; --desk-color-dark: #6a4ce8; }
-    .desk-researcher { grid-column: 11 / 13; grid-row: 2; --desk-color: #ffa502; --desk-color-dark: #ff9f1c; }
-    .desk-coach { grid-column: 1 / 3; grid-row: 3; --desk-color: #ff6b9d; --desk-color-dark: #e85a8a; }
-    .desk-risk { grid-column: 6 / 10; grid-row: 3; --desk-color: #ff4757; --desk-color-dark: #e8414f; }
-
-    /* Central screen bottom row - additional stats */
+    /* Bottom Stat Cards */
     .central-bottom {
-      grid-column: 3 / 11;
-      grid-row: 2;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      min-width: 0;
     }
+    @media (min-width: 560px) { .central-bottom { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .central-bottom { grid-template-columns: repeat(4, 1fr); } }
 
     .stat-card {
       background: var(--panel);
       border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 16px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 10px;
+      transition: border-color 0.3s, transform 0.2s;
     }
-    .stat-card:hover { border-color: rgba(0, 212, 170, 0.3); }
-    .stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-    .stat-icon svg { width: 20px; height: 20px; stroke: var(--bg); }
-    .stat-label { font-size: 0.65rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
-    .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; }
-    .stat-change { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; font-weight: 500; }
-    .stat-change.positive { color: var(--accent); }
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-icon svg { width: 24px; height: 24px; stroke: #0a0e14; }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .stat-change {
+      font-size: 0.7rem;
+      font-weight: 500;
+      margin-top: auto;
+    }
+    .stat-change.positive { color: var(--success); }
     .stat-change.negative { color: var(--danger); }
 
-    /* Floating particles */
-    .particle {
+    /* Particles Background */
+    #particles {
       position: fixed;
-      width: 3px;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 50%;
+      inset: 0;
       pointer-events: none;
       z-index: 0;
-      opacity: 0;
-      animation: particleRise 8s ease-in-out infinite;
+      overflow: hidden;
     }
-
-    @keyframes particleRise {
-      0% { opacity: 0; transform: translateY(100vh) scale(0); }
-      10% { opacity: 0.6; }
-      90% { opacity: 0.6; }
-      100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: particleFloat linear infinite;
+    }
+    @keyframes particleFloat {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
     }
 
     /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .bg-grid, .orb, .particle, .status-dot::before, .monitor-dot, .desk-status.alert { animation: none; }
-      .desk { transition: none; }
-    }
-
-    /* Responsive */
-    @media (max-width: 1200px) {
-      .floor-grid { grid-template-columns: repeat(6, 1fr); }
-      .desk-observer { grid-column: 1 / 4; grid-row: 1; }
-      .desk-journal { grid-column: 1 / 4; grid-row: 2; }
-      .desk-analyst { grid-column: 4 / 7; grid-row: 1; }
-      .desk-researcher { grid-column: 4 / 7; grid-row: 2; }
-      .central-screen { grid-column: 1 / 7; grid-row: 3 / 5; }
-      .desk-coach { grid-column: 1 / 4; grid-row: 5; }
-      .desk-risk { grid-column: 1 / 7; grid-row: 6; }
-      .central-bottom { grid-column: 1 / 7; grid-row: 7; grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      .floor-grid { grid-template-columns: 1fr; }
-      .desk-observer, .desk-journal, .desk-analyst, .desk-researcher, .desk-coach, .desk-risk { grid-column: 1; grid-row: auto; }
-      .central-screen { grid-column: 1; grid-row: auto; }
-      .central-bottom { grid-column: 1; grid-template-columns: 1fr; }
-      .office-floor { padding: 1rem; }
-      .office-header { padding: 1rem; }
-      
-      /* Mobile header: compact, stacked */
-      .header-content { flex-direction: column; gap: 1rem; align-items: flex-start; }
-      .status-indicators { flex-wrap: wrap; gap: 0.75rem; }
-      .status-dot { font-size: 0.7rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.03); border-radius: 999px; }
-      .status-dot::before { width: 6px; height: 6px; }
-      .time-display { font-size: 0.85rem; }
-      
-      /* Desk cards: larger touch targets, collapsible */
-      .desk { padding: 1rem; }
-      .desk-header { padding-bottom: 0.5rem; }
-      .desk-avatar { width: 44px; height: 44px; }
-      .desk-action { padding: 0.75rem 1rem; font-size: 0.75rem; min-height: 44px; }
-      
-      /* Monitors: stacked on mobile, larger text */
-      .desk-monitors { grid-template-columns: 1fr; }
-      .monitor { padding: 0.75rem; font-size: 0.7rem; }
-      .monitor-row { padding: 0.25rem 0; }
-      
-      /* Central screen: compact P&L */
-      .screen-header { padding: 0.75rem 1rem; }
-      .pnl-value { font-size: clamp(2.5rem, 12vw, 3.5rem); }
-      .pnl-sub { gap: 1.5rem; }
-      .pnl-stat-value { font-size: 1rem; }
-      .chart-area { height: 100px; }
-      
-      /* Stat cards: full width, larger */
-      .stat-card { padding: 1.25rem; }
-      .stat-value { font-size: 1.75rem; }
-      .stat-icon { width: 40px; height: 40px; }
-      
-      /* Reduce motion for performance */
-      .bg-grid { animation-duration: 40s; }
-      .orb { filter: blur(60px); }
-    }
-
-    @media (max-width: 480px) {
-      .office-floor { padding: 0.75rem; gap: 1rem; }
-      .office-header { padding: 0.75rem; }
-      .logo-title { font-size: 1rem; }
-      .logo-subtitle { font-size: 0.6rem; }
-      .logo-mark { width: 36px; height: 36px; }
-      .logo-mark svg { width: 20px; height: 20px; }
-      
-      .desk { padding: 0.875rem; }
-      .desk-avatar { width: 40px; height: 40px; }
-      .desk-avatar svg { width: 20px; height: 20px; }
-      .desk-name { font-size: 0.85rem; }
-      .desk-role { font-size: 0.6rem; }
-      
-      .monitor { font-size: 0.65rem; }
-      .monitor-header { font-size: 0.55rem; }
-      
-      .pnl-label { font-size: 0.65rem; }
-      .pnl-stat-label { font-size: 0.55rem; }
-      .pnl-stat-value { font-size: 0.9rem; }
-      
-      .stat-label { font-size: 0.55rem; }
-      .stat-value { font-size: 1.5rem; }
-      .stat-change { font-size: 0.6rem; }
-      
-      /* Hide particles on very small screens */
-      .particle { display: none; }
-    }
-
-    /* Landscape phone: keep horizontal space for P&L chart */
-    @media (max-width: 768px) and (orientation: landscape) {
-      .floor-grid { grid-template-columns: repeat(2, 1fr); }
-      .desk-observer { grid-column: 1; grid-row: 1; }
-      .desk-journal { grid-column: 1; grid-row: 2; }
-      .desk-analyst { grid-column: 2; grid-row: 1; }
-      .desk-researcher { grid-column: 2; grid-row: 2; }
-      .central-screen { grid-column: 1 / 3; grid-row: 3; }
-      .desk-coach { grid-column: 1; grid-row: 2; }
-      .desk-risk { grid-column: 1 / 3; grid-row: 5; }
-      .central-bottom { grid-column: 1 / 3; grid-row: 6; grid-template-columns: repeat(2, 1fr); }
-      
-      .chart-area { height: 80px; }
-      .pnl-value { font-size: clamp(2rem, 8vw, 3rem); }
-    }
-
-    /* Touch-friendly focus states */
-    .desk-action:focus-visible,
-    .monitor:focus-visible,
-    .stat-card:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* High contrast mode */
-    @media (prefers-contrast: high) {
-      .desk { border-width: 2px; }
-      .monitor { border-width: 2px; }
-      .stat-card { border-width: 2px; }
-      .screen-dot { border: 2px solid var(--bg); }
-    }
-
-    /* Print styles */
-    @media print {
-      .bg-grid, .orb, .particle, .desk-action { display: none; }
-      .office-container { min-height: auto; }
-      .floor-grid { display: block; }
-      .desk, .central-screen, .stat-card { break-inside: avoid; page-break-inside: avoid; }
-      body { background: white; color: black; }
-      .desk, .central-screen, .stat-card { border: 1px solid #ccc; background: white; }
-    }
-
-    /* Low-end device optimizations */
-    .low-end .bg-grid { animation: none; background-image: none; }
-    .low-end .orb { display: none; }
-    .low-end .particle { display: none; }
-    .low-end .desk { transition: none; }
-    .low-end .monitor-dot { animation: none; }
-    .low-end .status-dot::before { animation: none; }
-    .low-end .desk-status.alert { animation: none; }
-  
-    /* ===== DESKTOP ≥1400px: FIXED CENTRAL COLUMN, READABLE DESK LABELS ===== */
-    @media (min-width: 1400px) {
-      .floor-grid {
-        max-width: 1800px;
-        grid-template-columns: 280px repeat(8, 1fr) 280px;
-        grid-template-rows: 60vh auto auto auto;
-        align-content: start;
-        align-items: start;
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
-
-      /* Side columns fixed at 280px min-width */
-      .desk-observer { grid-column: 1; grid-row: 1; }
-      .desk-journal { grid-column: 1; grid-row: 2; }
-      .desk-coach { grid-column: 1; grid-row: 3; }
-      .desk-analyst { grid-column: 10; grid-row: 1; }
-      .desk-researcher { grid-column: 10; grid-row: 2; }
-      .desk-auto { grid-column: 10; grid-row: 3; }
-
-      /* Central P&L: columns 2-9 (8 columns), positioned higher */
-      .central-screen {
-        grid-column: 2 / 10;
-        grid-row: 1 / 2;
-        height: 60vh;
-        min-height: 420px;
-        max-height: 600px;
-      }
-
-      /* Risk Guardian spans center-bottom */
-      .desk-risk {
-        grid-column: 2 / 10;
-        grid-row: 3;
-      }
-
-      /* Central stats: between P&L and Risk Guardian */
-      .central-bottom {
-        grid-column: 2 / 10;
-        grid-row: 2;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        min-width: 0;
-      }
-
-      /* Desk labels: prevent truncation, ensure readability */
-      .desk-name {
-        white-space: nowrap;
-        overflow: visible;
-        text-overflow: clip;
-        min-width: 0;
-        font-size: 0.85rem;
-        font-weight: 600;
-      }
-      .desk-role {
-        white-space: nowrap;
-        overflow: visible;
-        text-overflow: clip;
-        font-size: 0.7rem;
-        color: var(--ink-muted);
-      }
-      .desk-info { min-width: 0; }
-
-      /* Ensure desk content doesn't squish */
-      .desk {
-        min-width: 280px;
-        min-height: 220px;
-      }
-      .desk-monitors { min-width: 240px; }
-
-      /* Reduce header height on tall screens for more floor space */
-      .office-header { padding: 1rem 2rem; }
     }
-</style>
+
+    /* Mobile: safe area insets */
+    @supports (padding: max(0px)) {
+      .office-header { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+      .office-main { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+    }
+
+    /* Desktop hover states on mobile */
+    @media (hover: none) {
+      .desk:hover { transform: none; box-shadow: none; border-color: var(--panel-border); }
+      .desk:hover::before { opacity: 0; }
+      .stat-card:hover { transform: none; border-color: var(--panel-border); }
+      .monitor:hover { border-color: var(--panel-border); }
+      .pwa-install-btn:hover { transform: none; box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -646,57 +614,43 @@
   <div id="particles"></div>
 
   <div class="office-container">
-    <!-- Header -->
     <header class="office-header">
-      <div class="header-content">
-        <div class="logo-group">
-          <div class="logo-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-          </div>
-          <div class="logo-text">
-            <span class="logo-title">HERMES TRADING OFFICE</span>
-            <span class="logo-subtitle">24/7 Campaign Intelligence</span>
-          </div>
+      <div class="header-left">
+        <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+        <span class="header-title">HERMES TRADING OFFICE</span>
+      </div>
+      <div class="header-center">
+        <div class="pipeline-indicator" id="pipelineIndicator">
+          <span class="pipeline-dot" id="pipelineDot"></span>
+          <span id="pipelineStatus">PIPELINE: CONNECTING...</span>
         </div>
-        <div class="status-indicators">
-          <div class="status-dot">LIVE</div>
-          <div class="status-dot warning">3 ACTIVE CAMPAIGNS</div>
-          <div class="status-dot">RISK: NORMAL</div>
-          <div class="status-dot" id="pipelineStatus">
-            <span class="pipeline-indicator"></span>
-            <span>PIPELINE: HEALTHY</span>
-          </div>
-          <div class="time-display" id="timeDisplay">00:00:00 UTC</div>
-        </div>
+      </div>
+      <div class="header-right">
+        <span class="time-display" id="timeDisplay">00:00:00 UTC</span>
+        <button class="pwa-install-btn" id="installBtn">Install App</button>
       </div>
     </header>
 
-    <!-- Office Floor -->
-    <main class="office-floor">
+    <main class="office-main">
       <div class="floor-grid">
+
         <!-- Desk: OBSERVER -->
         <article class="desk desk-observer" data-module="observer">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l2 2"></path></svg></div>
             <div class="desk-info">
               <div class="desk-name">OBSERVER</div>
-              <div class="desk-role">Market Surveillance</div>
+              <div class="desk-role">Session & Confluence Monitor</div>
             </div>
-            <span class="desk-status">SCANNING</span>
+            <span class="desk-status busy">LIVE</span>
           </div>
           <div class="desk-monitors">
             <div class="monitor">
-              <div class="monitor-header"><span>SESSION STATE</span><span class="monitor-dot"></span></div>
-              <div class="monitor-row"><span class="monitor-label">ASIA</span><span class="monitor-value">OPEN</span></div>
-              <div class="monitor-row"><span class="monitor-label">LONDON</span><span class="monitor-value">PRE-MARKET</span></div>
-              <div class="monitor-row"><span class="monitor-label">NY</span><span class="monitor-value">CLOSED</span></div>
-              <div class="monitor-row"><span class="monitor-label">VOLATILITY</span><span class="monitor-value warning">ELEVATED</span></div>
+              <div class="monitor-header"><span>SESSION STATUS</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">CURRENT</span><span class="monitor-value" id="currentSession">ASIA</span></div>
+              <div class="monitor-row"><span class="monitor-label">NEXT</span><span class="monitor-value" id="nextSession">LONDON</span></div>
+              <div class="monitor-row"><span class="monitor-label">COUNTDOWN</span><span class="monitor-value" id="sessionCountdown">04:32:15</span></div>
+              <div class="monitor-row"><span class="monitor-label">VOL REGIME</span><span class="monitor-value" id="volRegime">QUIET</span></div>
             </div>
             <div class="monitor">
               <div class="monitor-header"><span>CONFLUENCE SCORE</span><span class="monitor-dot" id="confluenceDot"></span></div>
@@ -706,14 +660,13 @@
               <div class="monitor-row"><span class="monitor-label">NEXT UPDATE</span><span class="monitor-value" id="confluenceTime">~2 min</span></div>
             </div>
           </div>
+          <div class="desk-action">▶ LOG MARKET STRUCTURE SHIFT</div>
         </article>
 
         <!-- Desk: TRADING JOURNAL -->
         <article class="desk desk-journal" data-module="journal">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
             <div class="desk-info">
               <div class="desk-name">TRADING JOURNAL</div>
               <div class="desk-role">Execution Archive</div>
@@ -742,9 +695,7 @@
         <!-- Desk: CAMPAIGN ANALYST -->
         <article class="desk desk-analyst" data-module="analyst">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
             <div class="desk-info">
               <div class="desk-name">CAMPAIGN ANALYST</div>
               <div class="desk-role">Performance Attribution</div>
@@ -773,9 +724,7 @@
         <!-- Desk: PATTERN RESEARCHER -->
         <article class="desk desk-researcher" data-module="researcher">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.07 0 3.98.71 5.43 1.89"></path></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.07 0 3.98.71 5.43 1.89"></path></svg></div>
             <div class="desk-info">
               <div class="desk-name">PATTERN RESEARCHER</div>
               <div class="desk-role">Edge Discovery</div>
@@ -843,9 +792,7 @@
         <!-- Desk: TRADING COACH -->
         <article class="desk desk-coach" data-module="coach">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
             <div class="desk-info">
               <div class="desk-name">TRADING COACH</div>
               <div class="desk-role">Behavioral Feedback</div>
@@ -874,9 +821,7 @@
         <!-- Desk: RISK GUARDIAN -->
         <article class="desk desk-risk" id="risk" data-module="risk">
           <div class="desk-header">
-            <div class="desk-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            </div>
+            <div class="desk-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
             <div class="desk-info">
               <div class="desk-name">RISK GUARDIAN</div>
               <div class="desk-role">Hard Limits & Escalation</div>
@@ -933,6 +878,23 @@
   </div>
 
   <script>
+    // ===== API CONFIGURATION =====
+    const API_BASE = 'https://hermes-production-04cd.up.railway.app/api/v1';
+    const API_KEY = 'hermes-trading-office-2024';
+    
+    async function apiGet(endpoint) {
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`, {
+          headers: { 'X-API-Key': API_KEY }
+        });
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.json();
+      } catch (e) {
+        console.warn(`API ${endpoint} failed:`, e);
+        return null;
+      }
+    }
+
     // ===== TIME DISPLAY =====
     function updateTime() {
       const now = new Date();
@@ -1056,18 +1018,30 @@
     let baseRealized = 8234.15;
     let baseUnrealized = 4613.17;
 
+    async function fetchPnl() {
+      const data = await apiGet('/pnl');
+      if (data) {
+        basePnl = data.net_pnl;
+        baseRealized = data.realized_pnl;
+        baseUnrealized = data.unrealized_pnl;
+        updatePnlDisplay();
+      }
+    }
+
     function updatePnl() {
-      // Small random walk
-      const change = (Math.random() - 0.48) * 15; // Slight positive bias
+      // Small random walk (fallback when API unavailable)
+      const change = (Math.random() - 0.48) * 15;
       basePnl += change;
       baseRealized += change * 0.6;
       baseUnrealized += change * 0.4;
+      updatePnlDisplay();
+    }
 
+    function updatePnlDisplay() {
       document.getElementById('mainPnl').textContent = formatCurrency(basePnl);
       document.getElementById('realizedPnl').textContent = formatCurrency(baseRealized);
       document.getElementById('unrealizedPnl').textContent = formatCurrency(baseUnrealized);
 
-      // Update color based on P&L
       const mainEl = document.getElementById('mainPnl');
       const realizedEl = document.getElementById('realizedPnl');
       const unrealizedEl = document.getElementById('unrealizedPnl');
@@ -1082,7 +1056,70 @@
       return sign + val.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // Initial fetch, then poll every 10s
+    fetchPnl();
+    setInterval(fetchPnl, 10000);
+    // Fallback animation
     setInterval(updatePnl, 2000);
+
+    // ===== CONFLUENCE SCORE =====
+    async function fetchConfluence() {
+      const data = await apiGet('/confluence');
+      if (data) {
+        document.getElementById('confluenceScore').textContent = data.score?.toFixed(1) ?? '--';
+        document.getElementById('confluenceTier').textContent = data.tier ?? '--';
+        const setups = data.active_setups?.slice(0, 2).join(', ') ?? '--';
+        document.getElementById('activeSetups').textContent = setups;
+        document.getElementById('confluenceDot').classList.toggle('positive', data.tier?.includes('LONG'));
+        document.getElementById('confluenceDot').classList.toggle('negative', data.tier?.includes('SHORT'));
+      }
+    }
+    fetchConfluence();
+    setInterval(fetchConfluence, 15000);
+
+    // ===== RISK GUARDIAN =====
+    async function fetchRisk() {
+      const data = await apiGet('/risk');
+      if (data) {
+        document.querySelector('#risk .monitor-row .monitor-value.positive').textContent = 
+          `${data.daily_loss_pct?.toFixed(1) ?? '-1.2'}% / ${data.daily_limit_pct?.toFixed(1) ?? '-2.5'}%`;
+        document.querySelectorAll('#risk .monitor-row .monitor-value')[1].textContent = 
+          `${data.position_size_pct?.toFixed(1) ?? '3.4'}% / ${data.position_limit_pct?.toFixed(1) ?? '5.0'}%`;
+        document.querySelectorAll('#risk .monitor-row .monitor-value')[2].textContent = 
+          `${data.correlation?.toFixed(2) ?? '0.34'} / ${data.correlation_limit?.toFixed(1) ?? '0.7'}`;
+        document.querySelectorAll('#risk .monitor-row .monitor-value')[3].textContent = 
+          `${data.drawdown_pct?.toFixed(1) ?? '2.1'}% / ${data.drawdown_limit_pct?.toFixed(1) ?? '10.0'}%`;
+      }
+    }
+    fetchRisk();
+    setInterval(fetchRisk, 15000);
+
+    // ===== WEBSOCKET - LIVE UPDATES =====
+    function connectWebSocket() {
+      const ws = new WebSocket('wss://hermes-production-04cd.up.railway.app/ws/live');
+      ws.onopen = () => console.log('WS connected');
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.confluence) {
+            document.getElementById('confluenceScore').textContent = data.confluence.score?.toFixed(1) ?? '--';
+            document.getElementById('confluenceTier').textContent = data.confluence.tier ?? '--';
+          }
+          if (data.pnl) {
+            basePnl = data.pnl.net_pnl;
+            baseRealized = data.pnl.realized_pnl;
+            baseUnrealized = data.pnl.unrealized_pnl;
+            updatePnlDisplay();
+          }
+          if (data.risk) {
+            // Update risk display
+          }
+        } catch (e) { console.warn('WS parse error:', e); }
+      };
+      ws.onclose = () => setTimeout(connectWebSocket, 5000);
+      ws.onerror = () => ws.close();
+    }
+    connectWebSocket();
 
     // ===== PARTICLES =====
     const particlesContainer = document.getElementById('particles');
@@ -1115,7 +1152,7 @@
       }
     }, 1000);
 
-    // ===== DESK INTERACTIONS =====
+    // ===== DESK INTERACTONS =====
     document.querySelectorAll('.desk').forEach((desk, index) => {
       // Make desks focusable for keyboard navigation
       desk.setAttribute('tabindex', '0');
@@ -1127,7 +1164,7 @@
         actionBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const originalText = actionBtn.textContent;
-          actionBtn.textContent = '✓ DISPATCHED';
+          actionBtn.textContent = 'DISPATCHED';
           actionBtn.style.color = '#2ed573';
           actionBtn.style.borderColor = '#2ed573';
           setTimeout(() => {
@@ -1272,7 +1309,9 @@
       if (svg) svg.style.color = '#2ed573';
       
       // Reload data (simulate)
-      updatePnl();
+      fetchPnl();
+      fetchConfluence();
+      fetchRisk();
       // Re-animate chart
       pnlData.forEach((_, i, arr) => {
         arr[i] = arr[i] + (Math.random() - 0.5) * 5;
