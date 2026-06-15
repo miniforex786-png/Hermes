@@ -144,40 +144,8 @@ async def read_r2_file_age(key: str) -> Optional[float]:
         traceback.print_exc()
     return None
 
+
 async def read_r2_csv(key: str) -> Optional["pd.DataFrame"]:
-    if not r2_client:
-        return None
-    try:
-        response = r2_client.get_object(Bucket=R2_BUCKET, Key=key)
-        return pd.read_csv(io.BytesIO(response["Body"].read()))
-    except Exception as e:
-        print(f"R2 read csv failed for {key}: {e}")
-        return None
-
-async def read_r2_json(key: str) -> Optional[Dict]:
-    if not r2_client:
-        return None
-    try:
-        response = r2_client.get_object(Bucket=R2_BUCKET, Key=key)
-        return json.loads(response["Body"].read().decode("utf-8"))
-    except Exception as e:
-        print(f"R2 read json failed for {key}: {e}")
-        return None
-
-async def read_r2_file_age(key: str) -> Optional[float]:
-    if not r2_client:
-        return None
-    try:
-        response = r2_client.head_object(Bucket=R2_BUCKET, Key=key)
-        last_modified = response.get("LastModified")
-        if last_modified:
-            return time.time() - last_modified.timestamp()
-    except Exception:
-        pass
-    return None
-
-
-def read_mt5_pnl() -> Optional[Dict]:
     try:
         pnl_path = DATA_ROOT / "live_pnl.json"
         if pnl_path.exists():
