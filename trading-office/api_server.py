@@ -178,45 +178,6 @@ async def debug_r2(_: bool = Depends(verify_api_key)):
     }
 
 @app.get("/api/v1/debug/r2-read")
-
-@app.get("/api/v1/debug/pyarrow")
-async def debug_pyarrow(_: bool = Depends(verify_api_key)):
-    try:
-        import pyarrow
-        import pyarrow.parquet as pq
-        pyarrow_ok = True
-        pyarrow_version = pyarrow.__version__
-    except Exception as e:
-        pyarrow_ok = False
-        pyarrow_version = str(e)
-    
-    try:
-        import pandas as pd
-        pandas_ok = True
-        pandas_version = pd.__version__
-    except Exception as e:
-        pandas_ok = False
-        pandas_version = str(e)
-    
-    try:
-        import io
-        response = r2_client.get_object(Bucket=R2_BUCKET, Key="confluence_score/XAUUSD_confluence_score.parquet")
-        body = response["Body"].read()
-        df = pd.read_parquet(io.BytesIO(body))
-        parquet_read_ok = True
-        parquet_shape = str(df.shape)
-        parquet_cols = list(df.columns)[:5]
-    except Exception as e:
-        parquet_read_ok = False
-        parquet_shape = str(e)
-        parquet_cols = []
-    
-    return {
-        "pyarrow": {"ok": pyarrow_ok, "version": pyarrow_version},
-        "pandas": {"ok": pandas_ok, "version": pandas_version},
-        "parquet_read": {"ok": parquet_read_ok, "shape": parquet_shape, "cols": parquet_cols},
-        "r2_client": r2_client is not None
-    }
 async def debug_r2_read(key: str = "confluence_score/XAUUSD_confluence_score.parquet", _: bool = Depends(verify_api_key)):
     if not r2_client:
         return {"error": "R2 client not initialized"}
@@ -232,6 +193,46 @@ async def debug_r2_read(key: str = "confluence_score/XAUUSD_confluence_score.par
         }
     except Exception as e:
         return {"key": key, "error": str(e), "type": type(e).__name__}
+
+@app.get("/api/v1/debug/pyarrow")
+async def debug_pyarrow(_: bool = Depends(verify_api_key)):
+    try:
+        import pyarrow
+        import pyarrow.parquet as pq
+        pyarrow_ok = True
+        pyarrow_version = pyarrow.__version__
+    except Exception as e:
+        pyarrow_ok = False
+        pyarrow_version = str(e)
+
+    try:
+        import pandas as pd
+        pandas_ok = True
+        pandas_version = pd.__version__
+    except Exception as e:
+        pandas_ok = False
+        pandas_version = str(e)
+
+    try:
+        import io
+        response = r2_client.get_object(Bucket=R2_BUCKET, Key="confluence_score/XAUUSD_confluence_score.parquet")
+        body = response["Body"].read()
+        df = pd.read_parquet(io.BytesIO(body))
+        parquet_read_ok = True
+        parquet_shape = str(df.shape)
+        parquet_cols = list(df.columns)[:5]
+    except Exception as e:
+        parquet_read_ok = False
+        parquet_shape = str(e)
+        parquet_cols = []
+
+    return {
+        "pyarrow": {"ok": pyarrow_ok, "version": pyarrow_version},
+        "pandas": {"ok": pandas_ok, "version": pandas_version},
+        "parquet_read": {"ok": parquet_read_ok, "shape": parquet_shape, "cols": parquet_cols},
+        "r2_client": r2_client is not None
+    }
+
 
 @app.get("/api/v1/system/health")
 async def system_health(_: bool = Depends(verify_api_key)):
@@ -297,6 +298,86 @@ async def system_health(_: bool = Depends(verify_api_key)):
     return checks
 
 @app.get("/api/v1/confluence")
+async def get_confluence(_: bool = Depends(verify_api_key)):
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+
+    logger.debug("=== ENTERING get_confluence endpoint ===")
+    try:
+        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
+        logger.debug(f"Confluence path: {path}")
+        logger.debug(f"Path exists: {path.exists()}")
+
+        df = read_parquet_safe(path)
+        logger.debug(f"read_parquet_safe returned: {df is not None}")
+        logger.debug(f"df is None: {df is None}")
+        if df is not None:
+            logger.debug(f"df.empty: {df.empty}")
+
+        if df is None or df.empty:
+            logger.debug("Returning mock data")
+            return {
+                "score": 87.0,
+                "tier": "STRONG_LONG",
+                "confidence": 0.87,
+                "active_setups": ["H1 MOMENTUM", "H4 REVERSION"],
+                "components": {
+                    "trend_alignment": 0.82,
+                    "volatility_regime": 0.75,
+                    "session_favorability": 0.91,
+                    "structure_score": 0.88
+                },
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "mock": True
+            }
+
+        latest = df.iloc[-1]
+        return {
+            "score": float(latest.get("confluence_score", 0)),
+            "tier": str(latest.get("tier", "NEUTRAL")),
+            "confidence": float(latest.get("confidence", 0)),
+            "active_setups": str(latest.get("active_setups", "")).split(";") if latest.get("active_setups") else [],
+            "components": {
+                "trend_alignment": float(latest.get("trend_alignment", 0)),
+                "volatility_regime": float(latest.get("volatility_regime", 0)),
+                "session_favorability": float(latest.get("session_favorability", 0)),
+                "structure_score": float(latest.get("structure_score", 0)),
+            },
+            "timestamp": str(latest.name) if hasattr(latest, 'name') else datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Exception in get_confluence: {e}", exc_info=True)
+        raise
+
+@app.get("/api/v1/setups")
+async def get_setups(limit: int = 50, _: bool = Depends(verify_api_key)):
+    path = DATA_ROOT / "edge_discovery" / "XAUUSD_setup_labels.parquet"
+    df = read_parquet_safe(path)
+
+    if df is None or df.empty:
+        return {
+            "setups": [
+                {"timestamp": (datetime.utcnow() - timedelta(minutes=i*15)).isoformat() + "Z",
+                 "setup_name": "H1 MOMENTUM", "direction": "LONG",
+                 "fwd_return_5m": 0.12, "fwd_return_15m": 0.28, "fwd_return_30m": 0.45,
+                 "confluence_score": 87, "regime": "TRENDING", "session": "LONDON"}
+                for i in range(min(limit, 20))
+            ],
+            "count": min(limit, 20),
+            "mock": True
+        }
+
+    recent = df.tail(limit)
+    setups = []
+    for _, row in recent.iterrows():
+        setups.append({
+            "timestamp": str(row.name) if hasattr(row, 'name') else str(row.get("timestamp", "")),
+            "setup_name": str(row.get("setup_name", "")),
+            "direction": str(row.get("direction", "")),
+            "fwd_return_5m": float(row.get("fwd_return_5m", 0)),
+            "fwd_return_15m": float(row.get("fwd_return_15m", 0)),
+            "fwd_return_30m": float(row.get("fwd_return_30m", 0)),
             "confluence_score": float(row.get("confluence_score", 0)),
             "regime": str(row.get("regime", "")),
             "session": str(row.get("session", ""))
