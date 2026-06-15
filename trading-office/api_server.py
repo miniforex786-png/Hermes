@@ -305,15 +305,20 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
 
     logger.debug("=== ENTERING get_confluence endpoint ===")
     try:
-        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
-        logger.debug(f"Confluence path: {path}")
-        logger.debug(f"Path exists: {path.exists()}")
+        # Try R2 first
+        df = None
+        if r2_client:
+            try:
+                df = await read_r2_parquet("confluence_score/XAUUSD_confluence_score.parquet")
+                logger.debug(f"R2 read_parquet returned: {df is not None}")
+            except Exception as e:
+                logger.debug(f"R2 read failed: {e}")
 
-        df = read_parquet_safe(path)
-        logger.debug(f"read_parquet_safe returned: {df is not None}")
-        logger.debug(f"df is None: {df is None}")
-        if df is not None:
-            logger.debug(f"df.empty: {df.empty}")
+        # Fall back to local file
+        if df is None:
+            path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
+            df = read_parquet_safe(path)
+            logger.debug(f"Local read_parquet_safe returned: {df is not None}")
 
         if df is None or df.empty:
             logger.debug("Returning mock data")
@@ -348,41 +353,22 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
         }
     except Exception as e:
         logger.error(f"Exception in get_confluence: {e}", exc_info=True)
-        raise
-
-@app.get("/api/v1/setups")
-async def get_setups(limit: int = 50, _: bool = Depends(verify_api_key)):
-    path = DATA_ROOT / "edge_discovery" / "XAUUSD_setup_labels.parquet"
-    df = read_parquet_safe(path)
-
-    if df is None or df.empty:
+        # Return mock data on any error
         return {
-            "setups": [
-                {"timestamp": (datetime.utcnow() - timedelta(minutes=i*15)).isoformat() + "Z",
-                 "setup_name": "H1 MOMENTUM", "direction": "LONG",
-                 "fwd_return_5m": 0.12, "fwd_return_15m": 0.28, "fwd_return_30m": 0.45,
-                 "confluence_score": 87, "regime": "TRENDING", "session": "LONDON"}
-                for i in range(min(limit, 20))
-            ],
-            "count": min(limit, 20),
-            "mock": True
+            "score": 87.0,
+            "tier": "STRONG_LONG",
+            "confidence": 0.87,
+            "active_setups": ["H1 MOMENTUM", "H4 REVERSION"],
+            "components": {
+                "trend_alignment": 0.82,
+                "volatility_regime": 0.75,
+                "session_favorability": 0.91,
+                "structure_score": 0.88
+            },
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "mock": True,
+            "error": str(e)
         }
-
-    recent = df.tail(limit)
-    setups = []
-    for _, row in recent.iterrows():
-        setups.append({
-            "timestamp": str(row.name) if hasattr(row, 'name') else str(row.get("timestamp", "")),
-            "setup_name": str(row.get("setup_name", "")),
-            "direction": str(row.get("direction", "")),
-            "fwd_return_5m": float(row.get("fwd_return_5m", 0)),
-            "fwd_return_15m": float(row.get("fwd_return_15m", 0)),
-            "fwd_return_30m": float(row.get("fwd_return_30m", 0)),
-            "confluence_score": float(row.get("confluence_score", 0)),
-            "regime": str(row.get("regime", "")),
-            "session": str(row.get("session", ""))
-        })
-    return {"setups": setups, "count": len(setups)}
 
 @app.get("/api/v1/opportunity-windows")
 async def get_opportunity_windows(_: bool = Depends(verify_api_key)):
