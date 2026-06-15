@@ -5,5 +5,5 @@ pyyaml==6.0.1
 websockets==12.0
 boto3>=1.34
 botocore>=1.34
-hypercorn==0.17.2pyarrow==16.1.0
+hypercorn==0.17.2
 pyarrow==16.1.0
