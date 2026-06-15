@@ -743,3 +743,31 @@ if __name__ == "__main__":
     config.workers = 1
 
     hypercorn.asyncio.run(app, config)
+
+def read_parquet_safe(path: Path) -> Optional[pd.DataFrame]:
+    if not path.exists():
+        return None
+    try:
+        return pd.read_parquet(path)
+    except Exception:
+        return None
+
+
+def read_csv_safe(path: Path) -> Optional[pd.DataFrame]:
+    if not path.exists():
+        return None
+    try:
+        return pd.read_csv(path)
+    except Exception:
+        return None
+
+
+def read_json_safe(path: Path) -> Optional[Dict]:
+    if not path.exists():
+        return None
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
