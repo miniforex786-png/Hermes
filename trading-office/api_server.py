@@ -28,8 +28,8 @@ STATIC_DIR = Path(__file__).parent
 
 # R2 Configuration
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID")
-R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY_ID")
-R2_SECRET_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
+R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY_ID") or os.getenv("R2_ACCESS_KEY")
+R2_SECRET_KEY = os.getenv("R2_SECRET_ACCESS_KEY") or os.getenv("R2_SECRET_KEY")
 R2_BUCKET = os.getenv("R2_BUCKET", "hermes-pipeline")
 R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL")
 
