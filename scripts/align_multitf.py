@@ -18,19 +18,19 @@ def resample_to_tf(df: pd.DataFrame, tf: str) -> pd.DataFrame:
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     elif tf == "H1":
-        return df.resample("1H").agg({
+        return df.resample("1h").agg({
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     elif tf == "H4":
-        return df.resample("4H").agg({
+        return df.resample("4h").agg({
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     elif tf == "H6":
-        return df.resample("6H").agg({
+        return df.resample("6h").agg({
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     elif tf == "D1":
-        return df.resample("1D").agg({
+        return df.resample("1d").agg({
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     return df

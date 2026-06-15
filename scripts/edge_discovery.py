@@ -66,7 +66,10 @@ def label_setups(confluence_df: pd.DataFrame, m12_df: pd.DataFrame) -> pd.DataFr
             **fwd_returns
         })
     
-    return pd.DataFrame(results).set_index("timestamp")
+    df = pd.DataFrame(results)
+    if len(df) > 0:
+        df = df.set_index("timestamp")
+    return df
 
 def main():
     print("Running edge discovery / setup labeling...")
