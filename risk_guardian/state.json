@@ -1,0 +1,45 @@
+{
+  "daily_loss_pct": -1.2,
+  "daily_limit_pct": -2.5,
+  "position_size_pct": 3.4,
+  "position_limit_pct": 5.0,
+  "correlation": 0.34,
+  "correlation_limit": 0.7,
+  "drawdown_pct": 2.1,
+  "drawdown_limit_pct": 10.0,
+  "escalation_level": 1,
+  "escalation_ladder": [
+    {
+      "level": 1,
+      "name": "WARNING",
+      "threshold": 0.5,
+      "action": "Notify"
+    },
+    {
+      "level": 2,
+      "name": "REDUCE",
+      "threshold": 0.75,
+      "action": "Reduce size 50%"
+    },
+    {
+      "level": 3,
+      "name": "FLATTEN",
+      "threshold": 0.9,
+      "action": "Close all"
+    },
+    {
+      "level": 4,
+      "name": "LOCKDOWN",
+      "threshold": 1.0,
+      "action": "Pause trading"
+    }
+  ],
+  "campaign_guards": {
+    "max_layers": 2,
+    "current_layers": 0,
+    "basket_dd_limit_r": 1.5,
+    "runner_hold_enabled": true,
+    "revenge_cooldown_min": 15
+  },
+  "timestamp": "2026-06-15T07:22:11.968851Z"
+}

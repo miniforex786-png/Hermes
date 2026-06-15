@@ -1,0 +1,5 @@
+session,win_rate,avg_r,count,expectancy
+ASIA,0.62,0.45,142,0.12
+LONDON,0.68,0.67,289,0.28
+NY,0.64,0.52,201,0.19
+OVERLAP,0.71,0.82,156,0.41

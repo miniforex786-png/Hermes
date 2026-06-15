@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0e14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hermes Trading Office">
+  <meta name="description" content="24/7 Campaign Intelligence - Hermes Trading Office">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>Hermes Trading Office</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --bg-elevated: #111820;
+      --panel: #161d26;
+      --panel-border: #1e2a38;
+      --ink: #e8edf2;
+      --ink-muted: #7a8a9a;
+      --ink-dim: #4a5a6a;
+      --accent: #00d4aa;
+      --accent-dim: #00b894;
+      --accent-glow: rgba(0, 212, 170, 0.35);
+      --danger: #ff4757;
+      --danger-dim: #e8414f;
+      --danger-glow: rgba(255, 71, 87, 0.35);
+      --warning: #ffa502;
+      --warning-dim: #ff9f1c;
+      --info: #3742fa;
+      --success: #2ed573;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Animated background grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 60px; }
+    }
+
+    /* Subtle glow orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); animation: orbFloat 15s ease-in-out infinite; }
+    .orb-2 { bottom: -150px; left: -150px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(55, 66, 250, 0.15) 0%, transparent 70%); animation: orbFloat 18s ease-in-out infinite reverse; }
+    .orb-3 { top: 50%; left: 50%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255, 165, 2, 0.1) 0%, transparent 70%); animation: orbFloat 22s ease-in-out infinite; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -20px) scale(1.05); }
+      50% { transform: translate(-20px, 30px) scale(0.95); }
+      75% { transform: translate(25px, 25px) scale(1.02); }
+    }
+
+    /* Main container */
+    .office-container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      min-height: calc(var(--vh, 1vh) * 100);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .office-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(17, 24, 32, 0.8);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--info) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    .logo-mark svg { width: 24px; height: 24px; stroke: var(--bg); }
+
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .logo-subtitle { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+    .status-indicators { display: flex; align-items: center; gap: 1.5rem; }
+    .status-dot { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--ink-muted); }
+    .status-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
+    .status-dot.warning::before { background: var(--warning); box-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
+    .status-dot.danger::before { background: var(--danger); box-shadow: 0 0 10px var(--danger-glow); animation: pulseDanger 0.5s ease-in-out infinite; }
+
+    /* Pipeline health indicator in header */
+    #pipelineStatus { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); }
+    #pipelineStatus .pipeline-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px rgba(46, 213, 115, 0.5); animation: pulse 2s ease-in-out infinite; }
+    #pipelineStatus.degraded .pipeline-indicator { background: var(--warning); box-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
+    #pipelineStatus.down .pipeline-indicator { background: var(--danger); box-shadow: 0 0 10px var(--danger-glow); animation: pulseDanger 0.5s ease-in-out infinite; }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes pulseDanger { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } }
+
+    .time-display { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--ink); }
+
+    /* Main office floor */
+    .office-floor {
+      flex: 1;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .floor-grid {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto auto auto auto;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+      .desk-observer { grid-column: 1; grid-row: 1; }
+      .desk-journal { grid-column: 1; grid-row: 2; }
+      .desk-coach { grid-column: 1; grid-row: 3; }
+      .desk-analyst { grid-column: 10; grid-row: 1; }
+      .desk-researcher { grid-column: 10; grid-row: 2; }
+      .desk-auto { grid-column: 10; grid-row: 3; }
+      .central-screen {
+        grid-column: 2 / 10;
+        grid-row: 1 / 2;
+        height: 60vh;
+        min-height: 420px;
+        max-height: 600px;
+      }
+      .desk-risk {
+        grid-column: 2 / 10;
+        grid-row: 3;
+      }
+      .desk-name { white-space: nowrap; overflow: visible; text-overflow: clip; min-width: 0; font-size: 0.85rem; font-weight: 600; }
+      .desk-role { white-space: nowrap; overflow: visible; text-overflow: clip; font-size: 0.7rem; color: var(--ink-muted); }
+      .desk-info { min-width: 0; }
+      .desk { min-width: 280px; min-height: 220px; }
+      .desk-monitors { min-width: 240px; }
+      .office-header { padding: 1rem 2rem; }
+    }
+
+    /* Central P&L Wall Screen */
+    .central-screen {
+      grid-column: 3 / 11;
+      grid-row: 1 / 3;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(0, 212, 170, 0.1) inset,
+        0 20px 60px -20px rgba(0, 0, 0, 0.5),
+        0 0 100px -40px var(--accent-glow);
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .screen-title { font-weight: 600; font-size: 0.95rem; }
+    .screen-controls { display: flex; gap: 0.5rem; }
+    .screen-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .screen-dot:nth-child(1) { background: var(--danger); }
+    .screen-dot:nth-child(2) { background: var(--warning); }
+    .screen-dot:nth-child(3) { background: var(--success); }
+
+    .screen-content { padding: 1.5rem; height: 100%; display: flex; flex-direction: column; }
+
+    .pnl-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .pnl-label { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.5rem; }
+    .pnl-value { font-family: 'JetBrains Mono', monospace; font-size: clamp(3rem, 8vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+    .pnl-value.positive { color: var(--accent); text-shadow: 0 0 40px var(--accent-glow); }
+    .pnl-value.negative { color: var(--danger); text-shadow: 0 0 40px var(--danger-glow); }
+
+    .pnl-sub { display: flex; gap: 3rem; margin-top: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .pnl-stat { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+    .pnl-stat-label { font-size: 0.65rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+    .pnl-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 600; }
+
+    .chart-area {
+      height: 120px;
+      width: 100%;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .chart-canvas { width: 100%; height: 100%; }
+
+    /* Desk modules */
+    .desk {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
+    }
+
+    .desk:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px -15px rgba(0, 0, 0, 0.5);
+      border-color: rgba(0, 212, 170, 0.3);
+    }
+
+    .desk::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--desk-color, var(--accent));
+      border-radius: 12px 12px 0 0;
+      opacity: 0.6;
+    }
+
+    .desk-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .desk-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--desk-color, var(--accent)) 0%, var(--desk-color-dark, var(--accent-dim)) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 20px -5px var(--desk-color, var(--accent));
+    }
+    .desk-avatar svg { width: 24px; height: 24px; stroke: var(--bg); }
+
+    .desk-info { flex: 1; min-width: 0; }
+    .desk-name { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .desk-role { font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.125rem; }
+
+    .desk-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.625rem; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); border-radius: 999px; font-size: 0.65rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+    .desk-status.busy { background: rgba(55, 66, 250, 0.1); border-color: rgba(55, 66, 250, 0.2); color: var(--info); }
+    .desk-status.warning { background: rgba(255, 165, 2, 0.1); border-color: rgba(255, 165, 2, 0.2); color: var(--warning); }
+    .desk-status.alert { background: rgba(255, 71, 87, 0.1); border-color: rgba(255, 71, 87, 0.2); color: var(--danger); animation: statusBlink 1s ease-in-out infinite; }
+
+    @keyframes statusBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .desk-monitors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+    /* Observer desk: stack monitors vertically */
+    .desk-observer .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Campaign Analyst desk: stack monitors vertically */
+    .desk-analyst .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Trading Journal desk: stack monitors vertically */
+    .desk-journal .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Pattern Researcher desk: stack monitors vertically */
+    .desk-researcher .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+
+    /* Trading Coach desk: stack monitors vertically */
+    .desk-coach .desk-monitors {
+      grid-template-columns: 1fr;
+    }
+    .monitor {
+      background: #080c10;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      line-height: 1.5;
+    }
+
+    .monitor-header { display: flex; align-items: center; justify-content: space-between; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.6rem; }
+    .monitor-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 2s ease-in-out infinite; }
+    .monitor-dot.idle { background: var(--ink-dim); box-shadow: none; animation: none; }
+
+    .monitor-row { display: flex; justify-content: space-between; gap: 1rem; }
+    .monitor-label { color: var(--ink-muted); }
+    .monitor-value { color: var(--ink); font-weight: 500; text-align: right; }
+    .monitor-value.positive { color: var(--accent); }
+    .monitor-value.negative { color: var(--danger); }
+    .monitor-value.warning { color: var(--warning); }
+
+    .monitor-bar { height: 4px; background: var(--panel-border); border-radius: 2px; overflow: hidden; }
+    .monitor-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--desk-color, var(--accent)), var(--desk-color-dark, var(--accent-dim))); transition: width 0.5s ease; }
+
+    .desk-action { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 8px; font-size: 0.7rem; color: var(--ink-muted); transition: all 0.2s ease; }
+    .desk-action:hover { background: rgba(0, 212, 170, 0.05); border-color: var(--accent); color: var(--accent); cursor: pointer; }
+
+    /* Specific desk positions */
+    .desk-observer { grid-column: 1 / 3; grid-row: 1; --desk-color: #00d4aa; --desk-color-dark: #00b894; }
+    .desk-journal { grid-column: 1 / 3; grid-row: 2; --desk-color: #3742fa; --desk-color-dark: #2d3ae8; }
+    .desk-analyst { grid-column: 11 / 13; grid-row: 1; --desk-color: #7c5cff; --desk-color-dark: #6a4ce8; }
+    .desk-researcher { grid-column: 11 / 13; grid-row: 2; --desk-color: #ffa502; --desk-color-dark: #ff9f1c; }
+    .desk-coach { grid-column: 1 / 3; grid-row: 3; --desk-color: #ff6b9d; --desk-color-dark: #e85a8a; }
+    .desk-risk { grid-column: 6 / 10; grid-row: 3; --desk-color: #ff4757; --desk-color-dark: #e8414f; }
+
+    /* Central screen bottom row - additional stats */
+    .central-bottom {
+      grid-column: 3 / 11;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .stat-card:hover { border-color: rgba(0, 212, 170, 0.3); }
+    .stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .stat-icon svg { width: 20px; height: 20px; stroke: var(--bg); }
+    .stat-label { font-size: 0.65rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; }
+    .stat-change { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; font-weight: 500; }
+    .stat-change.positive { color: var(--accent); }
+    .stat-change.negative { color: var(--danger); }
+
+    /* Floating particles */
+    .particle {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      animation: particleRise 8s ease-in-out infinite;
+    }
+
+    @keyframes particleRise {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .bg-grid, .orb, .particle, .status-dot::before, .monitor-dot, .desk-status.alert { animation: none; }
+      .desk { transition: none; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .floor-grid { grid-template-columns: repeat(6, 1fr); }
+      .desk-observer { grid-column: 1 / 4; grid-row: 1; }
+      .desk-journal { grid-column: 1 / 4; grid-row: 2; }
+      .desk-analyst { grid-column: 4 / 7; grid-row: 1; }
+      .desk-researcher { grid-column: 4 / 7; grid-row: 2; }
+      .central-screen { grid-column: 1 / 7; grid-row: 3 / 5; }
+      .desk-coach { grid-column: 1 / 4; grid-row: 5; }
+      .desk-risk { grid-column: 1 / 7; grid-row: 6; }
+      .central-bottom { grid-column: 1 / 7; grid-row: 7; grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .floor-grid { grid-template-columns: 1fr; }
+      .desk-observer, .desk-journal, .desk-analyst, .desk-researcher, .desk-coach, .desk-risk { grid-column: 1; grid-row: auto; }
+      .central-screen { grid-column: 1; grid-row: auto; }
+      .central-bottom { grid-column: 1; grid-template-columns: 1fr; }
+      .office-floor { padding: 1rem; }
+      .office-header { padding: 1rem; }
+      
+      /* Mobile header: compact, stacked */
+      .header-content { flex-direction: column; gap: 1rem; align-items: flex-start; }
+      .status-indicators { flex-wrap: wrap; gap: 0.75rem; }
+      .status-dot { font-size: 0.7rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.03); border-radius: 999px; }
+      .status-dot::before { width: 6px; height: 6px; }
+      .time-display { font-size: 0.85rem; }
+      
+      /* Desk cards: larger touch targets, collapsible */
+      .desk { padding: 1rem; }
+      .desk-header { padding-bottom: 0.5rem; }
+      .desk-avatar { width: 44px; height: 44px; }
+      .desk-action { padding: 0.75rem 1rem; font-size: 0.75rem; min-height: 44px; }
+      
+      /* Monitors: stacked on mobile, larger text */
+      .desk-monitors { grid-template-columns: 1fr; }
+      .monitor { padding: 0.75rem; font-size: 0.7rem; }
+      .monitor-row { padding: 0.25rem 0; }
+      
+      /* Central screen: compact P&L */
+      .screen-header { padding: 0.75rem 1rem; }
+      .pnl-value { font-size: clamp(2.5rem, 12vw, 3.5rem); }
+      .pnl-sub { gap: 1.5rem; }
+      .pnl-stat-value { font-size: 1rem; }
+      .chart-area { height: 100px; }
+      
+      /* Stat cards: full width, larger */
+      .stat-card { padding: 1.25rem; }
+      .stat-value { font-size: 1.75rem; }
+      .stat-icon { width: 40px; height: 40px; }
+      
+      /* Reduce motion for performance */
+      .bg-grid { animation-duration: 40s; }
+      .orb { filter: blur(60px); }
+    }
+
+    @media (max-width: 480px) {
+      .office-floor { padding: 0.75rem; gap: 1rem; }
+      .office-header { padding: 0.75rem; }
+      .logo-title { font-size: 1rem; }
+      .logo-subtitle { font-size: 0.6rem; }
+      .logo-mark { width: 36px; height: 36px; }
+      .logo-mark svg { width: 20px; height: 20px; }
+      
+      .desk { padding: 0.875rem; }
+      .desk-avatar { width: 40px; height: 40px; }
+      .desk-avatar svg { width: 20px; height: 20px; }
+      .desk-name { font-size: 0.85rem; }
+      .desk-role { font-size: 0.6rem; }
+      
+      .monitor { font-size: 0.65rem; }
+      .monitor-header { font-size: 0.55rem; }
+      
+      .pnl-label { font-size: 0.65rem; }
+      .pnl-stat-label { font-size: 0.55rem; }
+      .pnl-stat-value { font-size: 0.9rem; }
+      
+      .stat-label { font-size: 0.55rem; }
+      .stat-value { font-size: 1.5rem; }
+      .stat-change { font-size: 0.6rem; }
+      
+      /* Hide particles on very small screens */
+      .particle { display: none; }
+    }
+
+    /* Landscape phone: keep horizontal space for P&L chart */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .floor-grid { grid-template-columns: repeat(2, 1fr); }
+      .desk-observer { grid-column: 1; grid-row: 1; }
+      .desk-journal { grid-column: 1; grid-row: 2; }
+      .desk-analyst { grid-column: 2; grid-row: 1; }
+      .desk-researcher { grid-column: 2; grid-row: 2; }
+      .central-screen { grid-column: 1 / 3; grid-row: 3; }
+      .desk-coach { grid-column: 1; grid-row: 2; }
+      .desk-risk { grid-column: 1 / 3; grid-row: 5; }
+      .central-bottom { grid-column: 1 / 3; grid-row: 6; grid-template-columns: repeat(2, 1fr); }
+      
+      .chart-area { height: 80px; }
+      .pnl-value { font-size: clamp(2rem, 8vw, 3rem); }
+    }
+
+    /* Touch-friendly focus states */
+    .desk-action:focus-visible,
+    .monitor:focus-visible,
+    .stat-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      .desk { border-width: 2px; }
+      .monitor { border-width: 2px; }
+      .stat-card { border-width: 2px; }
+      .screen-dot { border: 2px solid var(--bg); }
+    }
+
+    /* Print styles */
+    @media print {
+      .bg-grid, .orb, .particle, .desk-action { display: none; }
+      .office-container { min-height: auto; }
+      .floor-grid { display: block; }
+      .desk, .central-screen, .stat-card { break-inside: avoid; page-break-inside: avoid; }
+      body { background: white; color: black; }
+      .desk, .central-screen, .stat-card { border: 1px solid #ccc; background: white; }
+    }
+
+    /* Low-end device optimizations */
+    .low-end .bg-grid { animation: none; background-image: none; }
+    .low-end .orb { display: none; }
+    .low-end .particle { display: none; }
+    .low-end .desk { transition: none; }
+    .low-end .monitor-dot { animation: none; }
+    .low-end .status-dot::before { animation: none; }
+    .low-end .desk-status.alert { animation: none; }
+  
+    /* ===== DESKTOP ≥1400px: FIXED CENTRAL COLUMN, READABLE DESK LABELS ===== */
+    @media (min-width: 1400px) {
+      .floor-grid {
+        max-width: 1800px;
+        grid-template-columns: 280px repeat(8, 1fr) 280px;
+        grid-template-rows: 60vh auto auto auto;
+        align-content: start;
+        align-items: start;
+      }
+
+      /* Side columns fixed at 280px min-width */
+      .desk-observer { grid-column: 1; grid-row: 1; }
+      .desk-journal { grid-column: 1; grid-row: 2; }
+      .desk-coach { grid-column: 1; grid-row: 3; }
+      .desk-analyst { grid-column: 10; grid-row: 1; }
+      .desk-researcher { grid-column: 10; grid-row: 2; }
+      .desk-auto { grid-column: 10; grid-row: 3; }
+
+      /* Central P&L: columns 2-9 (8 columns), positioned higher */
+      .central-screen {
+        grid-column: 2 / 10;
+        grid-row: 1 / 2;
+        height: 60vh;
+        min-height: 420px;
+        max-height: 600px;
+      }
+
+      /* Risk Guardian spans center-bottom */
+      .desk-risk {
+        grid-column: 2 / 10;
+        grid-row: 3;
+      }
+
+      /* Central stats: between P&L and Risk Guardian */
+      .central-bottom {
+        grid-column: 2 / 10;
+        grid-row: 2;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        min-width: 0;
+      }
+
+      /* Desk labels: prevent truncation, ensure readability */
+      .desk-name {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        min-width: 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .desk-role {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        font-size: 0.7rem;
+        color: var(--ink-muted);
+      }
+      .desk-info { min-width: 0; }
+
+      /* Ensure desk content doesn't squish */
+      .desk {
+        min-width: 280px;
+        min-height: 220px;
+      }
+      .desk-monitors { min-width: 240px; }
+
+      /* Reduce header height on tall screens for more floor space */
+      .office-header { padding: 1rem 2rem; }
+    }
+</style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div id="particles"></div>
+
+  <div class="office-container">
+    <!-- Header -->
+    <header class="office-header">
+      <div class="header-content">
+        <div class="logo-group">
+          <div class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-title">HERMES TRADING OFFICE</span>
+            <span class="logo-subtitle">24/7 Campaign Intelligence</span>
+          </div>
+        </div>
+        <div class="status-indicators">
+          <div class="status-dot">LIVE</div>
+          <div class="status-dot warning">3 ACTIVE CAMPAIGNS</div>
+          <div class="status-dot">RISK: NORMAL</div>
+          <div class="status-dot" id="pipelineStatus">
+            <span class="pipeline-indicator"></span>
+            <span>PIPELINE: HEALTHY</span>
+          </div>
+          <div class="time-display" id="timeDisplay">00:00:00 UTC</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Office Floor -->
+    <main class="office-floor">
+      <div class="floor-grid">
+        <!-- Desk: OBSERVER -->
+        <article class="desk desk-observer" data-module="observer">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">OBSERVER</div>
+              <div class="desk-role">Market Surveillance</div>
+            </div>
+            <span class="desk-status">SCANNING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>SESSION STATE</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">ASIA</span><span class="monitor-value">OPEN</span></div>
+              <div class="monitor-row"><span class="monitor-label">LONDON</span><span class="monitor-value">PRE-MARKET</span></div>
+              <div class="monitor-row"><span class="monitor-label">NY</span><span class="monitor-value">CLOSED</span></div>
+              <div class="monitor-row"><span class="monitor-label">VOLATILITY</span><span class="monitor-value warning">ELEVATED</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>CONFLUENCE SCORE</span><span class="monitor-dot" id="confluenceDot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">SCORE</span><span class="monitor-value positive" id="confluenceScore">87</span></div>
+              <div class="monitor-row"><span class="monitor-label">TIER</span><span class="monitor-value positive" id="confluenceTier">STRONG_LONG</span></div>
+              <div class="monitor-row"><span class="monitor-label">ACTIVE SETUPS</span><span class="monitor-value" id="activeSetups">H1 MOM, H4 REV</span></div>
+              <div class="monitor-row"><span class="monitor-label">NEXT UPDATE</span><span class="monitor-value" id="confluenceTime">~2 min</span></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Desk: TRADING JOURNAL -->
+        <article class="desk desk-journal" data-module="journal">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">TRADING JOURNAL</div>
+              <div class="desk-role">Execution Archive</div>
+            </div>
+            <span class="desk-status busy">RECORDING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>TODAY'S LOG</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">TRADES</span><span class="monitor-value">14</span></div>
+              <div class="monitor-row"><span class="monitor-label">WINS</span><span class="monitor-value positive">9</span></div>
+              <div class="monitor-row"><span class="monitor-label">LOSSES</span><span class="monitor-value negative">5</span></div>
+              <div class="monitor-row"><span class="monitor-label">WIN RATE</span><span class="monitor-value positive">64.3%</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>EXECUTION QUALITY</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">AVG ENTRY</span><span class="monitor-value positive">+0.3 R</span></div>
+              <div class="monitor-row"><span class="monitor-label">AVG EXIT</span><span class="monitor-value negative">-0.1 R</span></div>
+              <div class="monitor-row"><span class="monitor-label">MFE CAPTURE</span><span class="monitor-value">72%</span></div>
+              <div class="monitor-row"><span class="monitor-label">MAE CONTROL</span><span class="monitor-value positive">88%</span></div>
+            </div>
+          </div>
+          <div class="desk-action">▶ TAG BEHAVIORAL PATTERN</div>
+        </article>
+
+        <!-- Desk: CAMPAIGN ANALYST -->
+        <article class="desk desk-analyst" data-module="analyst">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">CAMPAIGN ANALYST</div>
+              <div class="desk-role">Performance Attribution</div>
+            </div>
+            <span class="desk-status">ANALYZING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>ACTIVE CAMPAIGNS</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">PROBE #234</span><span class="monitor-value positive">+2.4R</span></div>
+              <div class="monitor-row"><span class="monitor-label">PROBE #235</span><span class="monitor-value">+0.8R</span></div>
+              <div class="monitor-row"><span class="monitor-label">DISCR #089</span><span class="monitor-value positive">+3.1R</span></div>
+              <div class="monitor-row"><span class="monitor-label">DISCR #090</span><span class="monitor-value negative">-0.5R</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>ATTRIBUTION</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">DIRECTIONAL</span><span class="monitor-value positive">+1.8R</span></div>
+              <div class="monitor-row"><span class="monitor-label">MEAN REVERT</span><span class="monitor-value">+0.3R</span></div>
+              <div class="monitor-row"><span class="monitor-label">BREAKOUT</span><span class="monitor-value positive">+2.2R</span></div>
+              <div class="monitor-row"><span class="monitor-label">SCALP</span><span class="monitor-value negative">-0.4R</span></div>
+            </div>
+          </div>
+          <div class="desk-action">▶ GENERATE CAMPAIGN REPORT</div>
+        </article>
+
+        <!-- Desk: PATTERN RESEARCHER -->
+        <article class="desk desk-researcher" data-module="researcher">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.07 0 3.98.71 5.43 1.89"></path></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">PATTERN RESEARCHER</div>
+              <div class="desk-role">Edge Discovery</div>
+            </div>
+            <span class="desk-status busy">MINING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>HYPOTHESIS QUEUE</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">H1 MOMENTUM</span><span class="monitor-value positive">VALIDATED</span></div>
+              <div class="monitor-row"><span class="monitor-label">H4 REVERSION</span><span class="monitor-value">TESTING</span></div>
+              <div class="monitor-row"><span class="monitor-label">D1 BREAKOUT</span><span class="monitor-value warning">PENDING</span></div>
+              <div class="monitor-row"><span class="monitor-label">M12 ENTRY</span><span class="monitor-value positive">CONFIRMED</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>BACKTEST RESULTS</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">SHARPE</span><span class="monitor-value positive">2.34</span></div>
+              <div class="monitor-row"><span class="monitor-label">MAX DD</span><span class="monitor-value">-8.2%</span></div>
+              <div class="monitor-row"><span class="monitor-label">PROFIT FACTOR</span><span class="monitor-value positive">1.87</span></div>
+              <div class="monitor-row"><span class="monitor-label">TRADES/YR</span><span class="monitor-value">847</span></div>
+            </div>
+          </div>
+          <div class="desk-action">▶ INITIATE WALK-FORWARD TEST</div>
+        </article>
+
+        <!-- Central P&L Screen -->
+        <section class="central-screen" id="pnl" aria-label="Daily P&L Dashboard">
+          <div class="screen-header">
+            <div class="screen-title">DAILY P&L · SESSION OVERVIEW</div>
+            <div class="screen-controls">
+              <span class="screen-dot"></span>
+              <span class="screen-dot"></span>
+              <span class="screen-dot"></span>
+            </div>
+          </div>
+          <div class="screen-content">
+            <div class="pnl-main">
+              <div class="pnl-label">Net P&L (Realized + Unrealized)</div>
+              <div class="pnl-value positive" id="mainPnl">+$12,847.32</div>
+              <div class="pnl-sub">
+                <div class="pnl-stat">
+                  <div class="pnl-stat-label">Realized</div>
+                  <div class="pnl-stat-value positive" id="realizedPnl">+$8,234.15</div>
+                </div>
+                <div class="pnl-stat">
+                  <div class="pnl-stat-label">Unrealized</div>
+                  <div class="pnl-stat-value positive" id="unrealizedPnl">+$4,613.17</div>
+                </div>
+                <div class="pnl-stat">
+                  <div class="pnl-stat-label">Max Drawdown</div>
+                  <div class="pnl-stat-value" id="maxDd">-2.1%</div>
+                </div>
+                <div class="pnl-stat">
+                  <div class="pnl-stat-label">Risk Used</div>
+                  <div class="pnl-stat-value warning" id="riskUsed">67%</div>
+                </div>
+              </div>
+              <div class="chart-area">
+                <canvas class="chart-canvas" id="pnlChart" width="800" height="120"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Desk: TRADING COACH -->
+        <article class="desk desk-coach" data-module="coach">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">TRADING COACH</div>
+              <div class="desk-role">Behavioral Feedback</div>
+            </div>
+            <span class="desk-status">OBSERVING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>BEHAVIORAL ALERTS</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">OVERSIZING</span><span class="monitor-value">NONE</span></div>
+              <div class="monitor-row"><span class="monitor-label">REVENGE TRADE</span><span class="monitor-value">NONE</span></div>
+              <div class="monitor-row"><span class="monitor-label">FOMO ENTRY</span><span class="monitor-value warning">1 FLAG</span></div>
+              <div class="monitor-row"><span class="monitor-label">HESITATION</span><span class="monitor-value">2 FLAGS</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>COACHING QUEUE</span><span class="monitor-dot idle"></span></div>
+              <div class="monitor-row"><span class="monitor-label">NEXT REVIEW</span><span class="monitor-value">14:30 UTC</span></div>
+              <div class="monitor-row"><span class="monitor-label">FOCUS AREA</span><span class="monitor-value">EXIT TIMING</span></div>
+              <div class="monitor-row"><span class="monitor-label">PRIORITY</span><span class="monitor-value warning">HIGH</span></div>
+              <div class="monitor-row"><span class="monitor-label">DATA SOURCE</span><span class="monitor-value">JOURNAL + RISK</span></div>
+            </div>
+          </div>
+          <div class="desk-action">▶ SEND FEEDBACK NOTIFICATION</div>
+        </article>
+
+        <!-- Desk: RISK GUARDIAN -->
+        <article class="desk desk-risk" id="risk" data-module="risk">
+          <div class="desk-header">
+            <div class="desk-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div class="desk-info">
+              <div class="desk-name">RISK GUARDIAN</div>
+              <div class="desk-role">Hard Limits & Escalation</div>
+            </div>
+            <span class="desk-status alert">MONITORING</span>
+          </div>
+          <div class="desk-monitors">
+            <div class="monitor">
+              <div class="monitor-header"><span>HARD LIMITS</span><span class="monitor-dot"></span></div>
+              <div class="monitor-row"><span class="monitor-label">DAILY LOSS</span><span class="monitor-value positive">-1.2% / -5%</span></div>
+              <div class="monitor-row"><span class="monitor-label">POSITION SIZE</span><span class="monitor-value">3.4% / 5%</span></div>
+              <div class="monitor-row"><span class="monitor-label">CORRELATION</span><span class="monitor-value">0.34 / 0.7</span></div>
+              <div class="monitor-row"><span class="monitor-label">DRAWDOWN</span><span class="monitor-value">2.1% / 10%</span></div>
+            </div>
+            <div class="monitor">
+              <div class="monitor-header"><span>ESCALATION LADDER</span><span class="monitor-dot idle"></span></div>
+              <div class="monitor-row"><span class="monitor-label">L1 WARNING</span><span class="monitor-value">50% LIMIT</span></div>
+              <div class="monitor-row"><span class="monitor-label">L2 REDUCE</span><span class="monitor-value">75% LIMIT</span></div>
+              <div class="monitor-row"><span class="monitor-label">L3 FLATTEN</span><span class="monitor-value">90% LIMIT</span></div>
+              <div class="monitor-row"><span class="monitor-label">L4 LOCKDOWN</span><span class="monitor-value danger">100% LIMIT</span></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Bottom Stat Cards -->
+        <div class="central-bottom">
+          <article class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #00d4aa, #00b894);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+            <div class="stat-label">Sharpe Ratio (30D)</div>
+            <div class="stat-value" id="sharpeVal">2.34</div>
+            <div class="stat-change positive">▲ +0.12 vs last month</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #3742fa, #2d3ae8);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+            <div class="stat-label">Max Drawdown (30D)</div>
+            <div class="stat-value" id="ddVal">-8.2%</div>
+            <div class="stat-change positive">▼ -1.4% improvement</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ffa502, #ff9f1c);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M1 20l21-21"></path><polyline points="17 14 23 14 23 20"></polyline></svg></div>
+            <div class="stat-label">Profit Factor</div>
+            <div class="stat-value" id="pfVal">1.87</div>
+            <div class="stat-change positive">▲ +0.09</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b9d, #e85a8a);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+            <div class="stat-label">Win Rate (Session)</div>
+            <div class="stat-value" id="wrVal">64.3%</div>
+            <div class="stat-change positive">▲ +3.1%</div>
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ===== TIME DISPLAY =====
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toISOString().substr(11, 8) + ' UTC';
+      document.getElementById('timeDisplay').textContent = timeStr;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // ===== P&L CHART =====
+    const chartCanvas = document.getElementById('pnlChart');
+    const ctx = chartCanvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    function resizeChart() {
+      const rect = chartCanvas.getBoundingClientRect();
+      chartCanvas.width = rect.width * dpr;
+      chartCanvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      chartCanvas.style.width = rect.width + 'px';
+      chartCanvas.style.height = rect.height + 'px';
+      drawChart();
+    }
+
+    // Generate sample P&L data
+    function generatePnlData(points = 100) {
+      const data = [];
+      let value = 0;
+      for (let i = 0; i < points; i++) {
+        // Trending upward with noise
+        const drift = 0.5;
+        const volatility = 3;
+        value += drift + (Math.random() - 0.5) * volatility;
+        data.push(value);
+      }
+      return data;
+    }
+
+    const pnlData = generatePnlData(200);
+
+    function drawChart() {
+      const width = chartCanvas.width / dpr;
+      const height = chartCanvas.height / dpr;
+      const padding = 10;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Find min/max
+      const min = Math.min(...pnlData);
+      const max = Math.max(...pnlData);
+      const range = max - min || 1;
+
+      // Gradient area
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, 'rgba(0, 212, 170, 0.25)');
+      gradient.addColorStop(1, 'rgba(0, 212, 170, 0)');
+
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding);
+
+      pnlData.forEach((val, i) => {
+        const x = padding + (i / (pnlData.length - 1)) * (width - 2 * padding);
+        const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.lineTo(width - padding, height - padding);
+      ctx.closePath();
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      pnlData.forEach((val, i) => {
+        const x = padding + (i / (pnlData.length - 1)) * (width - 2 * padding);
+        const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#00d4aa';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = 'rgba(0, 212, 170, 0.5)';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Current value dot
+      const lastX = width - padding;
+      const lastY = height - padding - ((pnlData[pnlData.length - 1] - min) / range) * (height - 2 * padding);
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00d4aa';
+      ctx.fill();
+      ctx.strokeStyle = '#0a0e14';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    resizeChart();
+    window.addEventListener('resize', resizeChart);
+
+    // Animate chart data
+    let frameCount = 0;
+    function animateChartThrottled() {
+      frameCount++;
+      if (frameCount % 3 === 0) {
+        pnlData.shift();
+        const lastVal = pnlData[pnlData.length - 1];
+        pnlData.push(lastVal + 0.3 + (Math.random() - 0.5) * 2.5);
+        drawChart();
+      }
+      requestAnimationFrame(animateChartThrottled);
+    }
+    animateChartThrottled();
+
+    // ===== LIVE P&L UPDATES =====
+    let basePnl = 12847.32;
+    let baseRealized = 8234.15;
+    let baseUnrealized = 4613.17;
+
+    function updatePnl() {
+      // Small random walk
+      const change = (Math.random() - 0.48) * 15; // Slight positive bias
+      basePnl += change;
+      baseRealized += change * 0.6;
+      baseUnrealized += change * 0.4;
+
+      document.getElementById('mainPnl').textContent = formatCurrency(basePnl);
+      document.getElementById('realizedPnl').textContent = formatCurrency(baseRealized);
+      document.getElementById('unrealizedPnl').textContent = formatCurrency(baseUnrealized);
+
+      // Update color based on P&L
+      const mainEl = document.getElementById('mainPnl');
+      const realizedEl = document.getElementById('realizedPnl');
+      const unrealizedEl = document.getElementById('unrealizedPnl');
+      [mainEl, realizedEl, unrealizedEl].forEach(el => {
+        el.classList.toggle('positive', parseFloat(el.textContent.replace(/[$,]/g, '')) >= 0);
+        el.classList.toggle('negative', parseFloat(el.textContent.replace(/[$,]/g, '')) < 0);
+      });
+    }
+
+    function formatCurrency(val) {
+      const sign = val >= 0 ? '+' : '';
+      return sign + val.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    setInterval(updatePnl, 2000);
+
+    // ===== PARTICLES =====
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 20;
+
+    for (let i = 0; i < particleCount; i++) {
+      createParticle();
+    }
+
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + 'vw';
+      particle.style.animationDelay = Math.random() * 8 + 's';
+      particle.style.animationDuration = (6 + Math.random() * 6) + 's';
+      const size = 2 + Math.random() * 3;
+      particle.style.width = size + 'px';
+      particle.style.height = size + 'px';
+      particle.style.background = Math.random() > 0.5 ? 'rgba(0, 212, 170, 0.6)' : 'rgba(55, 66, 250, 0.4)';
+      particlesContainer.appendChild(particle);
+
+      // Remove after animation
+      setTimeout(() => particle.remove(), 12000);
+    }
+
+    // Spawn new particles periodically
+    setInterval(() => {
+      if (particlesContainer.children.length < particleCount) {
+        createParticle();
+      }
+    }, 1000);
+
+    // ===== DESK INTERACTIONS =====
+    document.querySelectorAll('.desk').forEach((desk, index) => {
+      // Make desks focusable for keyboard navigation
+      desk.setAttribute('tabindex', '0');
+      desk.setAttribute('role', 'button');
+      desk.setAttribute('aria-label', `${desk.querySelector('.desk-name').textContent} desk`);
+      
+      const actionBtn = desk.querySelector('.desk-action');
+      if (actionBtn) {
+        actionBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const originalText = actionBtn.textContent;
+          actionBtn.textContent = '✓ DISPATCHED';
+          actionBtn.style.color = '#2ed573';
+          actionBtn.style.borderColor = '#2ed573';
+          setTimeout(() => {
+            actionBtn.textContent = originalText;
+            actionBtn.style.color = '';
+            actionBtn.style.borderColor = '';
+          }, 1500);
+        });
+      }
+      
+      // Keyboard activation
+      desk.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          actionBtn?.click();
+        }
+      });
+    });
+
+    // ===== MOBILE: SWIPE NAVIGATION BETWEEN DESKS =====
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    const desks = Array.from(document.querySelectorAll('.desk'));
+    let currentDeskIndex = 0;
+    
+    function findFocusableDesks() {
+      return Array.from(document.querySelectorAll('.desk[tabindex="0"]'));
+    }
+    
+    function focusDesk(index) {
+      const desks = findFocusableDesks();
+      if (desks[index]) {
+        desks[index].focus({ preventScroll: true });
+        desks[index].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        currentDeskIndex = index;
+      }
+    }
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+    
+    document.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      const deltaTime = Date.now() - touchStartTime;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      
+      // Swipe detection: horizontal swipe > vertical, minimum distance, maximum time
+      if (absX > absY && absX > 50 && deltaTime < 300) {
+        const focusableDesks = findFocusableDesks();
+        if (deltaX < 0) {
+          // Swipe left -> next desk
+          focusDesk(Math.min(currentDeskIndex + 1, focusableDesks.length - 1));
+        } else {
+          // Swipe right -> previous desk
+          focusDesk(Math.max(currentDeskIndex - 1, 0));
+        }
+      }
+      
+      // Tap on desk to focus (for screen readers)
+      const target = e.target.closest('.desk');
+      if (target && absX < 10 && absY < 10) {
+        const index = desks.indexOf(target);
+        if (index !== -1) focusDesk(index);
+      }
+    }, { passive: true });
+
+    // ===== MOBILE: PULL-TO-REFRESH =====
+    let pullStartY = 0;
+    let isPulling = false;
+    let pullDistance = 0;
+    const PULL_THRESHOLD = 80;
+    const MAX_PULL = 120;
+    
+    const refreshIndicator = document.createElement('div');
+    refreshIndicator.id = 'pullRefreshIndicator';
+    refreshIndicator.style.cssText = `
+      position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: var(--accent);
+      background: var(--panel);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; pointer-events: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: top 0.2s ease-out;
+    `;
+    refreshIndicator.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+    document.body.appendChild(refreshIndicator);
+    
+    let refreshAnimationFrame = null;
+    let refreshRotation = 0;
+    
+    function animateRefreshSpinner() {
+      refreshRotation += 10;
+      const svg = refreshIndicator.querySelector('svg');
+      if (svg) svg.style.transform = `rotate(${refreshRotation}deg)`;
+      refreshAnimationFrame = requestAnimationFrame(animateRefreshSpinner);
+    }
+    
+    function showRefreshIndicator(progress) {
+      const clampedProgress = Math.min(progress, 1);
+      const top = -60 + (clampedProgress * (MAX_PULL + 60));
+      refreshIndicator.style.top = `${top}px`;
+      const svg = refreshIndicator.querySelector('svg');
+      if (svg) {
+        svg.style.opacity = clampedProgress;
+        if (progress >= 1) {
+          if (!refreshAnimationFrame) animateRefreshSpinner();
+        } else {
+          cancelAnimationFrame(refreshAnimationFrame);
+          refreshAnimationFrame = null;
+          refreshRotation = 0;
+          svg.style.transform = 'rotate(0deg)';
+        }
+      }
+    }
+    
+    function hideRefreshIndicator() {
+      refreshIndicator.style.top = '-60px';
+      cancelAnimationFrame(refreshAnimationFrame);
+      refreshAnimationFrame = null;
+      refreshRotation = 0;
+      const svg = refreshIndicator.querySelector('svg');
+      if (svg) {
+        svg.style.transform = 'rotate(0deg)';
+        svg.style.opacity = '0';
+      }
+    }
+    
+    function triggerRefresh() {
+      // Visual feedback
+      refreshIndicator.style.borderTopColor = '#2ed573';
+      const svg = refreshIndicator.querySelector('svg');
+      if (svg) svg.style.color = '#2ed573';
+      
+      // Reload data (simulate)
+      updatePnl();
+      // Re-animate chart
+      pnlData.forEach((_, i, arr) => {
+        arr[i] = arr[i] + (Math.random() - 0.5) * 5;
+      });
+      drawChart();
+      
+      // Update desk monitors with new mock data
+      document.querySelectorAll('.monitor-value').forEach(el => {
+        if (el.textContent.includes('%') || el.textContent.includes('R')) return;
+        const val = parseFloat(el.textContent.replace(/[$,]/g, ''));
+        if (!isNaN(val)) {
+          el.textContent = formatCurrency(val + (Math.random() - 0.5) * 100);
+        }
+      });
+      
+      setTimeout(() => {
+        hideRefreshIndicator();
+        refreshIndicator.style.borderTopColor = 'var(--accent)';
+        if (svg) svg.style.color = 'var(--accent)';
+      }, 800);
+    }
+    
+    document.addEventListener('touchstart', (e) => {
+      if (window.scrollY === 0) {
+        pullStartY = e.touches[0].clientY;
+        isPulling = true;
+      }
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!isPulling || window.scrollY > 0) return;
+      
+      const currentY = e.touches[0].clientY;
+      pullDistance = currentY - pullStartY;
+      
+      if (pullDistance > 0) {
+        e.preventDefault();
+        showRefreshIndicator(Math.min(pullDistance / PULL_THRESHOLD, 1.2));
+      }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', () => {
+      if (!isPulling) return;
+      isPulling = false;
+      
+      if (pullDistance >= PULL_THRESHOLD) {
+        triggerRefresh();
+      } else {
+        hideRefreshIndicator();
+      }
+      pullDistance = 0;
+    }, { passive: true });
+
+    // ===== MOBILE: VIEWPORT HEIGHT FIX FOR MOBILE BROWSERS =====
+    function setVHVar() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setVHVar();
+    window.addEventListener('resize', setVHVar);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(setVHVar, 100);
+    });
+
+    // ===== MOBILE: PERFORMANCE - REDUCE ANIMATIONS ON LOW-END DEVICES =====
+    const isLowEndDevice = navigator.hardwareConcurrency <= 4 || 
+                           (navigator.deviceMemory && navigator.deviceMemory <= 4);
+    
+    if (isLowEndDevice) {
+      document.documentElement.classList.add('low-end');
+      // Reduce particle count
+      const particlesContainer = document.getElementById('particles');
+      if (particlesContainer) {
+        while (particlesContainer.children.length > 8) {
+          particlesContainer.children[0].remove();
+        }
+      }
+    }
+
+    // ===== MOBILE: INTERSECTION OBSERVER FOR PERFORMANCE =====
+    // Pause animations when desks are off-screen
+    const deskObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const monitors = entry.target.querySelectorAll('.monitor-dot');
+        monitors.forEach(dot => {
+          dot.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+        });
+      });
+    }, { rootMargin: '100px', threshold: 0.1 });
+    
+    document.querySelectorAll('.desk').forEach(desk => deskObserver.observe(desk));
+
+    // ===== REDUCED MOTION CHECK =====
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      document.querySelectorAll('.particle, .orb, .bg-grid').forEach(el => el.style.animation = 'none');
+      document.querySelectorAll('.status-dot::before, .monitor-dot, .desk-status.alert').forEach(el => el.style.animation = 'none');
+    }
+  </script>
+</body>
+</html>
