@@ -125,27 +125,18 @@ async def read_r2_json(key: str) -> Optional[Dict]:
 
 async def read_r2_file_age(key: str) -> Optional[float]:
     if not r2_client:
-        print("read_r2_file_age: r2_client is None")
         return None
     try:
-        print(f"read_r2_file_age: calling head_object for {key}")
         response = r2_client.head_object(Bucket=R2_BUCKET, Key=key)
-        print(f"read_r2_file_age: response = {response}")
         last_modified = response.get("LastModified")
-        print(f"read_r2_file_age: last_modified = {last_modified}, type = {type(last_modified)}")
         if last_modified:
-            ts = last_modified.timestamp()
-            age = time.time() - ts
-            print(f"read_r2_file_age: age = {age}")
-            return age
-    except Exception as e:
-        print(f"read_r2_file_age exception: {e}")
-        import traceback
-        traceback.print_exc()
+            return time.time() - last_modified.timestamp()
+    except Exception:
+        pass
     return None
 
 
-async def read_r2_csv(key: str) -> Optional["pd.DataFrame"]:
+def read_mt5_pnl() -> Optional[Dict]:
     try:
         pnl_path = DATA_ROOT / "live_pnl.json"
         if pnl_path.exists():
@@ -243,24 +234,6 @@ async def debug_pyarrow(_: bool = Depends(verify_api_key)):
     }
 
 
-async def read_r2_file_age_safe(key: str) -> Optional[float]:
-    """Read file age from R2, handling both sync and async contexts."""
-    if not r2_client:
-        return None
-    try:
-        try:
-            loop = asyncio.get_running_loop()
-            # We're in an async context, create a task
-            return await read_r2_file_age(key)
-        except RuntimeError:
-            # No running loop, safe to use run_until_complete
-            loop = asyncio.get_event_loop()
-            return loop.run_until_complete(read_r2_file_age(key))
-    except Exception as e:
-        print(f"R2 file age check failed for {key}: {e}")
-        return None
-
-
 @app.get("/api/v1/system/health")
 async def system_health(_: bool = Depends(verify_api_key)):
     checks = {
@@ -282,8 +255,13 @@ async def system_health(_: bool = Depends(verify_api_key)):
     for name, key in key_files.items():
         age = None
         if r2_client:
-            age = await read_r2_file_age_safe(key)
-        
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    age = loop.run_until_complete(read_r2_file_age(key))
+            except RuntimeError:
+                pass
         if age is None:
             path = DATA_ROOT / key
             age = get_file_age(path)
@@ -327,20 +305,15 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
 
     logger.debug("=== ENTERING get_confluence endpoint ===")
     try:
-        # Try R2 first
-        df = None
-        if r2_client:
-            try:
-                df = await read_r2_parquet("confluence_score/XAUUSD_confluence_score.parquet")
-                logger.debug(f"R2 read_parquet returned: {df is not None}")
-            except Exception as e:
-                logger.debug(f"R2 read failed: {e}")
+        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
+        logger.debug(f"Confluence path: {path}")
+        logger.debug(f"Path exists: {path.exists()}")
 
-        # Fall back to local file
-        if df is None:
-            path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
-            df = read_parquet_safe(path)
-            logger.debug(f"Local read_parquet_safe returned: {df is not None}")
+        df = read_parquet_safe(path)
+        logger.debug(f"read_parquet_safe returned: {df is not None}")
+        logger.debug(f"df is None: {df is None}")
+        if df is not None:
+            logger.debug(f"df.empty: {df.empty}")
 
         if df is None or df.empty:
             logger.debug("Returning mock data")
@@ -375,22 +348,41 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
         }
     except Exception as e:
         logger.error(f"Exception in get_confluence: {e}", exc_info=True)
-        # Return mock data on any error
+        raise
+
+@app.get("/api/v1/setups")
+async def get_setups(limit: int = 50, _: bool = Depends(verify_api_key)):
+    path = DATA_ROOT / "edge_discovery" / "XAUUSD_setup_labels.parquet"
+    df = read_parquet_safe(path)
+
+    if df is None or df.empty:
         return {
-            "score": 87.0,
-            "tier": "STRONG_LONG",
-            "confidence": 0.87,
-            "active_setups": ["H1 MOMENTUM", "H4 REVERSION"],
-            "components": {
-                "trend_alignment": 0.82,
-                "volatility_regime": 0.75,
-                "session_favorability": 0.91,
-                "structure_score": 0.88
-            },
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "mock": True,
-            "error": str(e)
+            "setups": [
+                {"timestamp": (datetime.utcnow() - timedelta(minutes=i*15)).isoformat() + "Z",
+                 "setup_name": "H1 MOMENTUM", "direction": "LONG",
+                 "fwd_return_5m": 0.12, "fwd_return_15m": 0.28, "fwd_return_30m": 0.45,
+                 "confluence_score": 87, "regime": "TRENDING", "session": "LONDON"}
+                for i in range(min(limit, 20))
+            ],
+            "count": min(limit, 20),
+            "mock": True
         }
+
+    recent = df.tail(limit)
+    setups = []
+    for _, row in recent.iterrows():
+        setups.append({
+            "timestamp": str(row.name) if hasattr(row, 'name') else str(row.get("timestamp", "")),
+            "setup_name": str(row.get("setup_name", "")),
+            "direction": str(row.get("direction", "")),
+            "fwd_return_5m": float(row.get("fwd_return_5m", 0)),
+            "fwd_return_15m": float(row.get("fwd_return_15m", 0)),
+            "fwd_return_30m": float(row.get("fwd_return_30m", 0)),
+            "confluence_score": float(row.get("confluence_score", 0)),
+            "regime": str(row.get("regime", "")),
+            "session": str(row.get("session", ""))
+        })
+    return {"setups": setups, "count": len(setups)}
 
 @app.get("/api/v1/opportunity-windows")
 async def get_opportunity_windows(_: bool = Depends(verify_api_key)):
@@ -614,315 +606,6 @@ async def get_coaching(_: bool = Depends(verify_api_key)):
                         return {"signals": signals, "count": len(signals), "mock": False}
         except RuntimeError:
             pass
-
-    coaching_dir = DATA_ROOT / "coaching"
-    signals = []
-    if coaching_dir.exists():
-        for f in sorted(coaching_dir.glob("*.json"))[-10:]:
-            try:
-                with open(f) as fp:
-                    signals.append(json.load(fp))
-            except Exception:
-                pass
-
-    if not signals:
-        signals = [
-            {"type": "pre_entry", "phase": "PRE_ENTRY", "message": "H4 bullish + H1 shallow pullback = your sweet spot. Confidence: 8.7/10", "timestamp": (datetime.utcnow() - timedelta(minutes=15)).isoformat()+"Z"},
-            {"type": "during", "phase": "DURING", "message": "Runner held past 2.0R - your data shows +0.8R avg runner value", "timestamp": (datetime.utcnow() - timedelta(minutes=8)).isoformat()+"Z"},
-            {"type": "post", "phase": "POST", "message": "Campaign +2.8R - runner discipline paid off. Exit timing improving.", "timestamp": (datetime.utcnow() - timedelta(minutes=2)).isoformat()+"Z"}
-        ]
-
-    return {"signals": signals, "count": len(signals), "mock": not coaching_dir.exists()}
-
-async def fetch_live_snapshot() -> dict:
-    snapshot = {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "confluence": None,
-        "pnl": None,
-        "risk": None,
-        "pipeline": None
-    }
-
-    try:
-        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
-        df = read_parquet_safe(path)
-        if df is not None and not df.empty:
-            latest = df.iloc[-1]
-            snapshot["confluence"] = {
-                "score": float(latest.get("confluence_score", 0)),
-                "tier": str(latest.get("tier", "NEUTRAL")),
-                "active_setups": str(latest.get("active_setups", "")).split(";") if latest.get("active_setups") else []
-            }
-    except Exception:
-        pass
-
-    try:
-        pnl_path = DATA_ROOT / "live_pnl.json"
-        data = None
-        if r2_client:
-            import asyncio
-            try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    data = loop.run_until_complete(read_r2_json("live_pnl.json"))
-            except RuntimeError:
-                pass
-        if data is None and pnl_path.exists():
-            with open(pnl_path) as f:
-                data = json.load(f)
-        if data:
-            snapshot["pnl"] = data
-    except Exception:
-        pass
-
-    try:
-        risk_path = DATA_ROOT / "risk_guardian" / "state.json"
-        data = None
-        if r2_client:
-            import asyncio
-            try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    data = loop.run_until_complete(read_r2_json("risk_guardian/state.json"))
-            except RuntimeError:
-                pass
-        if data is None and risk_path.exists():
-            with open(risk_path) as f:
-                data = json.load(f)
-        if data:
-            snapshot["risk"] = data
-    except Exception:
-        pass
-
-    try:
-        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
-        age = get_file_age(path)
-        if age:
-            snapshot["pipeline"] = {
-                "status": "healthy" if age < 1800 else "degraded" if age < 3600 else "down",
-                "last_update_seconds_ago": round(age)
-            }
-    except Exception:
-        pass
-
-    return snapshot
-
-@app.websocket("/ws/live")
-async def websocket_live(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        await websocket.send_json(await fetch_live_snapshot())
-        while True:
-            await asyncio.sleep(5)
-            await websocket.send_json(await fetch_live_snapshot())
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-        manager.disconnect(websocket)
-
-async def broadcast_loop():
-    while True:
-        await asyncio.sleep(5)
-        if manager.active_connections:
-            data = await fetch_live_snapshot()
-            await manager.broadcast(data)
-
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(broadcast_loop())
-
-def get_file_age(path: Path) -> Optional[float]:
-    try:
-        if path.exists():
-            return time.time() - path.stat().st_mtime
-    except Exception:
-        pass
-    return None
-
-if __name__ == "__main__":
-    import hypercorn.asyncio
-    from hypercorn.config import Config
-
-    config = Config()
-    config.bind = ["0.0.0.0:8080"]
-    config.log_level = "INFO"
-    config.worker_class = "asyncio"
-    config.workers = 1
-
-    hypercorn.asyncio.run(app, config)
-
-def read_parquet_safe(path: Path) -> Optional[pd.DataFrame]:
-    if not path.exists():
-        return None
-    try:
-        return pd.read_parquet(path)
-    except Exception:
-        return None
-
-
-def read_csv_safe(path: Path) -> Optional[pd.DataFrame]:
-    if not path.exists():
-        return None
-    try:
-        return pd.read_csv(path)
-    except Exception:
-        return None
-
-
-def read_json_safe(path: Path) -> Optional[Dict]:
-    if not path.exists():
-        return None
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except Exception:
-        return None
-async def read_r2_json_safe(key: str):
-    """Safely read JSON from R2, works in both sync and async contexts."""
-    if not r2_client:
-        return None
-    try:
-        try:
-            loop = asyncio.get_running_loop()
-            return await read_r2_json(key)
-        except RuntimeError:
-            loop = asyncio.get_event_loop()
-            return await read_r2_json(key)
-    except Exception as e:
-        print(f"R2 read json failed for {key}: {e}")
-        return None
-
-
-async def read_mt5_pnl() -> Optional[Dict]:
-    try:
-        pnl_path = DATA_ROOT / "live_pnl.json"
-        if pnl_path.exists():
-            with open(pnl_path) as f:
-                return json.load(f)
-        return None
-    except Exception:
-        return None
-
-
-async def read_mt5_positions() -> List[Dict]:
-    return []
-
-
-@app.get("/api/v1/pnl")
-async def get_pnl(_: bool = Depends(verify_api_key)):
-    path = DATA_ROOT / "live_pnl.json"
-    data = None
-    if r2_client:
-        data = await read_r2_json_safe("live_pnl.json")
-    if data is None and path.exists():
-        try:
-            with open(path) as f:
-                data = json.load(f)
-        except Exception:
-            pass
-
-    if data:
-        return data
-
-    mt5_pnl = await read_mt5_pnl()
-    if mt5_pnl:
-        return mt5_pnl
-
-    return {
-        "net_pnl": 12847.32,
-        "realized_pnl": 8234.15,
-        "unrealized_pnl": 4613.17,
-        "max_drawdown_pct": -2.1,
-        "risk_used_pct": 67,
-        "daily_pnl": 1247.32,
-        "weekly_pnl": 8234.15,
-        "monthly_pnl": 28471.32,
-        "open_positions": 3,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "mock": True
-    }
-
-
-@app.get("/api/v1/campaigns")
-async def get_campaigns(_: bool = Depends(verify_api_key)):
-    path = DATA_ROOT / "active_campaigns.json"
-    data = None
-    if r2_client:
-        data = await read_r2_json_safe("active_campaigns.json")
-    if data is None and path.exists():
-        try:
-            with open(path) as f:
-                data = json.load(f)
-        except Exception:
-            pass
-
-    if data:
-        return data
-
-    return {
-        "active": [
-            {"id": "PROBE-234", "type": "probe", "symbol": "XAUUSD", "layers": 2, "pnl_r": 2.4, "status": "active"},
-            {"id": "PROBE-235", "type": "probe", "symbol": "XAUUSD", "layers": 1, "pnl_r": 0.8, "status": "active"},
-            {"id": "DISCR-089", "type": "discretionary", "symbol": "XAUUSD", "pnl_r": 3.1, "status": "active"},
-            {"id": "DISCR-090", "type": "discretionary", "symbol": "XAUUSD", "pnl_r": -0.5, "status": "active"}
-        ],
-        "closed_today": 14,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "mock": True
-    }
-
-
-@app.get("/api/v1/behaviour")
-async def get_behaviour(_: bool = Depends(verify_api_key)):
-    path = DATA_ROOT / "behaviour_analysis" / "outputs" / "behaviour_summary.json"
-    data = None
-    if r2_client:
-        data = await read_r2_json_safe("behaviour_analysis/outputs/behaviour_summary.json")
-    if data is None and path.exists():
-        try:
-            with open(path) as f:
-                data = json.load(f)
-        except Exception:
-            pass
-
-    if data:
-        return data
-
-    return {
-        "session_bias": {"best": "London/NY", "worst": "Asian"},
-        "campaign_type": {"probe": 0.6, "discretionary": 1.4},
-        "exit_tendency": "cuts_winners_early",
-        "runner_impact": "+0.3R",
-        "optimal_layers": 2,
-        "optimal_adds": 2,
-        "risk_consistency": 0.92,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "mock": True
-    }
-
-
-@app.get("/api/v1/coaching")
-async def get_coaching(_: bool = Depends(verify_api_key)):
-    data = None
-    if r2_client:
-        try:
-            loop = asyncio.get_running_loop()
-            response = await loop.run_in_executor(None, 
-                lambda: r2_client.list_objects_v2(Bucket=R2_BUCKET, Prefix="coaching/"))
-        except RuntimeError:
-            response = r2_client.list_objects_v2(Bucket=R2_BUCKET, Prefix="coaching/")
-        if "Contents" in response:
-            signals = []
-            for obj in sorted(response["Contents"], key=lambda x: x["Key"])[-10:]:
-                try:
-                    obj_data = await read_r2_json_safe(obj["Key"])
-                    if obj_data:
-                        signals.append(obj_data)
-                except Exception:
-                    pass
-            if signals:
-                return {"signals": signals, "count": len(signals), "mock": False}
 
     coaching_dir = DATA_ROOT / "coaching"
     signals = []
