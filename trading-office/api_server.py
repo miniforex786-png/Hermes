@@ -214,6 +214,23 @@ async def debug_r2(_: bool = Depends(verify_api_key)):
         }
     }
 
+@app.get("/api/v1/debug/r2-read")
+async def debug_r2_read(key: str = "confluence_score/XAUUSD_confluence_score.parquet", _: bool = Depends(verify_api_key)):
+    if not r2_client:
+        return {"error": "R2 client not initialized"}
+    try:
+        response = r2_client.get_object(Bucket=R2_BUCKET, Key=key)
+        body = response["Body"].read()
+        return {
+            "key": key,
+            "size": len(body),
+            "content_type": response.get("ContentType"),
+            "last_modified": str(response.get("LastModified")),
+            "first_100_bytes": body[:100].hex() if body else None
+        }
+    except Exception as e:
+        return {"key": key, "error": str(e), "type": type(e).__name__}
+
 @app.get("/api/v1/system/health")
 async def system_health(_: bool = Depends(verify_api_key)):
     checks = {
