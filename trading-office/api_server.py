@@ -125,6 +125,47 @@ async def read_r2_json(key: str) -> Optional[Dict]:
 
 async def read_r2_file_age(key: str) -> Optional[float]:
     if not r2_client:
+        print("read_r2_file_age: r2_client is None")
+        return None
+    try:
+        print(f"read_r2_file_age: calling head_object for {key}")
+        response = r2_client.head_object(Bucket=R2_BUCKET, Key=key)
+        print(f"read_r2_file_age: response = {response}")
+        last_modified = response.get("LastModified")
+        print(f"read_r2_file_age: last_modified = {last_modified}, type = {type(last_modified)}")
+        if last_modified:
+            ts = last_modified.timestamp()
+            age = time.time() - ts
+            print(f"read_r2_file_age: age = {age}")
+            return age
+    except Exception as e:
+        print(f"read_r2_file_age exception: {e}")
+        import traceback
+        traceback.print_exc()
+    return None
+
+async def read_r2_csv(key: str) -> Optional["pd.DataFrame"]:
+    if not r2_client:
+        return None
+    try:
+        response = r2_client.get_object(Bucket=R2_BUCKET, Key=key)
+        return pd.read_csv(io.BytesIO(response["Body"].read()))
+    except Exception as e:
+        print(f"R2 read csv failed for {key}: {e}")
+        return None
+
+async def read_r2_json(key: str) -> Optional[Dict]:
+    if not r2_client:
+        return None
+    try:
+        response = r2_client.get_object(Bucket=R2_BUCKET, Key=key)
+        return json.loads(response["Body"].read().decode("utf-8"))
+    except Exception as e:
+        print(f"R2 read json failed for {key}: {e}")
+        return None
+
+async def read_r2_file_age(key: str) -> Optional[float]:
+    if not r2_client:
         return None
     try:
         response = r2_client.head_object(Bucket=R2_BUCKET, Key=key)
