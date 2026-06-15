@@ -194,6 +194,26 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat() + "Z"}
 
+@app.get("/api/v1/debug/r2")
+async def debug_r2(_: bool = Depends(verify_api_key)):
+    return {
+        "r2_client_initialized": r2_client is not None,
+        "env_vars": {
+            "R2_ACCOUNT_ID": bool(os.getenv("R2_ACCOUNT_ID")),
+            "R2_ACCESS_KEY_ID": bool(os.getenv("R2_ACCESS_KEY_ID")),
+            "R2_ACCESS_KEY": bool(os.getenv("R2_ACCESS_KEY")),
+            "R2_SECRET_ACCESS_KEY": bool(os.getenv("R2_SECRET_ACCESS_KEY")),
+            "R2_SECRET_KEY": bool(os.getenv("R2_SECRET_KEY")),
+            "R2_BUCKET": os.getenv("R2_BUCKET"),
+        },
+        "resolved": {
+            "account_id": os.getenv("R2_ACCOUNT_ID"),
+            "access_key": os.getenv("R2_ACCESS_KEY_ID") or os.getenv("R2_ACCESS_KEY"),
+            "secret_key": "***" if (os.getenv("R2_SECRET_ACCESS_KEY") or os.getenv("R2_SECRET_KEY")) else None,
+            "bucket": os.getenv("R2_BUCKET"),
+        }
+    }
+
 @app.get("/api/v1/system/health")
 async def system_health(_: bool = Depends(verify_api_key)):
     checks = {
