@@ -178,6 +178,45 @@ async def debug_r2(_: bool = Depends(verify_api_key)):
     }
 
 @app.get("/api/v1/debug/r2-read")
+
+@app.get("/api/v1/debug/pyarrow")
+async def debug_pyarrow(_: bool = Depends(verify_api_key)):
+    try:
+        import pyarrow
+        import pyarrow.parquet as pq
+        pyarrow_ok = True
+        pyarrow_version = pyarrow.__version__
+    except Exception as e:
+        pyarrow_ok = False
+        pyarrow_version = str(e)
+    
+    try:
+        import pandas as pd
+        pandas_ok = True
+        pandas_version = pd.__version__
+    except Exception as e:
+        pandas_ok = False
+        pandas_version = str(e)
+    
+    try:
+        import io
+        response = r2_client.get_object(Bucket=R2_BUCKET, Key="confluence_score/XAUUSD_confluence_score.parquet")
+        body = response["Body"].read()
+        df = pd.read_parquet(io.BytesIO(body))
+        parquet_read_ok = True
+        parquet_shape = str(df.shape)
+        parquet_cols = list(df.columns)[:5]
+    except Exception as e:
+        parquet_read_ok = False
+        parquet_shape = str(e)
+        parquet_cols = []
+    
+    return {
+        "pyarrow": {"ok": pyarrow_ok, "version": pyarrow_version},
+        "pandas": {"ok": pandas_ok, "version": pandas_version},
+        "parquet_read": {"ok": parquet_read_ok, "shape": parquet_shape, "cols": parquet_cols},
+        "r2_client": r2_client is not None
+    }
 async def debug_r2_read(key: str = "confluence_score/XAUUSD_confluence_score.parquet", _: bool = Depends(verify_api_key)):
     if not r2_client:
         return {"error": "R2 client not initialized"}
