@@ -234,6 +234,24 @@ async def debug_pyarrow(_: bool = Depends(verify_api_key)):
     }
 
 
+async def read_r2_file_age_safe(key: str) -> Optional[float]:
+    """Read file age from R2, handling both sync and async contexts."""
+    if not r2_client:
+        return None
+    try:
+        try:
+            loop = asyncio.get_running_loop()
+            # We're in an async context, create a task
+            return await read_r2_file_age(key)
+        except RuntimeError:
+            # No running loop, safe to use run_until_complete
+            loop = asyncio.get_event_loop()
+            return loop.run_until_complete(read_r2_file_age(key))
+    except Exception as e:
+        print(f"R2 file age check failed for {key}: {e}")
+        return None
+
+
 @app.get("/api/v1/system/health")
 async def system_health(_: bool = Depends(verify_api_key)):
     checks = {
@@ -255,13 +273,8 @@ async def system_health(_: bool = Depends(verify_api_key)):
     for name, key in key_files.items():
         age = None
         if r2_client:
-            import asyncio
-            try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    age = loop.run_until_complete(read_r2_file_age(key))
-            except RuntimeError:
-                pass
+            age = await read_r2_file_age_safe(key)
+        
         if age is None:
             path = DATA_ROOT / key
             age = get_file_age(path)
