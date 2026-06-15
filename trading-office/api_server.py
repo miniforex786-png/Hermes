@@ -135,43 +135,6 @@ async def read_r2_file_age(key: str) -> Optional[float]:
         pass
     return None
 
-def read_parquet_safe(path: Path) -> Optional["pd.DataFrame"]:
-    key = path.relative_to(DATA_ROOT).as_posix() if path.is_absolute() else str(path)
-    if r2_client:
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                df = loop.run_until_complete(read_r2_parquet(key))
-                if df is not None:
-                    return df
-        except RuntimeError:
-            pass
-    try:
-        if path.exists() and path.stat().st_size > 0:
-            return pd.read_parquet(path)
-    except Exception as e:
-        print(f"Error reading {path}: {e}")
-    return None
-
-def read_csv_safe(path: Path) -> Optional["pd.DataFrame"]:
-    key = path.relative_to(DATA_ROOT).as_posix() if path.is_absolute() else str(path)
-    if r2_client:
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                df = loop.run_until_complete(read_r2_csv(key))
-                if df is not None:
-                    return df
-        except RuntimeError:
-            pass
-    try:
-        if path.exists() and path.stat().st_size > 0:
-            return pd.read_csv(path)
-    except Exception as e:
-        print(f"Error reading {path}: {e}")
-    return None
 
 def read_mt5_pnl() -> Optional[Dict]:
     try:
