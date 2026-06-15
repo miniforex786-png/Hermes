@@ -20,13 +20,13 @@ import uvicorn
 
 # Configuration
 API_KEY = os.getenv("HERMES_API_KEY", "hermes-trading-office-2024")  # Set in production
-DATA_ROOT = Path(__file__).parent  # Railway rootDirectory=trading-office puts files at /app
-STATIC_DIR = DATA_ROOT  # index.html is in same folder
+DATA_ROOT = Path(__file__).parent.parent  # Project root: /c/Hermes on local, /app on Railway
+STATIC_DIR = Path(__file__).parent  # trading-office folder
 
 app = FastAPI(
     title="Hermes Trading Office API",
     description="REST + WebSocket API for 24/7 Campaign Intelligence Dashboard",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # CORS for PWA
@@ -96,6 +96,28 @@ def get_file_age(path: Path) -> Optional[float]:
     except Exception:
         pass
     return None
+
+# ==================== MT5 DATA READERS ====================
+
+def read_mt5_pnl() -> Optional[Dict]:
+    """Read live P&L from MT5 export data."""
+    try:
+        # Try to read from live_pnl.json first (if cron generates it)
+        pnl_path = DATA_ROOT / "live_pnl.json"
+        if pnl_path.exists():
+            with open(pnl_path) as f:
+                return json.load(f)
+        
+        # Fallback: compute from MT5 positions if available
+        # This would need the MT5 positions export
+        return None
+    except Exception:
+        return None
+
+def read_mt5_positions() -> List[Dict]:
+    """Read active positions from MT5 data."""
+    # This would parse MT5 positions export
+    return []
 
 # ==================== API ENDPOINTS ====================
 
@@ -356,6 +378,11 @@ async def get_pnl(_: bool = Depends(verify_api_key)):
         except Exception:
             pass
     
+    # Try to compute from MT5 positions
+    mt5_pnl = read_mt5_pnl()
+    if mt5_pnl:
+        return mt5_pnl
+    
     # Mock structure for development
     return {
         "net_pnl": 12847.32,
@@ -381,6 +408,10 @@ async def get_campaigns(_: bool = Depends(verify_api_key)):
                 return json.load(f)
         except Exception:
             pass
+    
+    # Try to parse from MT5 positions with comment tags
+    # Campaign 1 (Probe) = "SAG" or "102432419" in MT5 comment
+    # Campaign 2 (Discretionary) = "153072542" in MT5 comment
     
     # Mock structure for development
     return {
