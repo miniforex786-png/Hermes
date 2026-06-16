@@ -879,7 +879,7 @@
 
   <script>
     // ===== API CONFIGURATION =====
-    const API_BASE = 'https://hermes-production-04cd.up.railway.app/api/v1';
+    const API_BASE = 'https://api.trade.miniforex786.win/api/v1';
     const API_KEY = 'hermes-trading-office-2024';
     
     async function apiGet(endpoint) {
@@ -1096,7 +1096,7 @@
 
     // ===== WEBSOCKET - LIVE UPDATES =====
     function connectWebSocket() {
-      const ws = new WebSocket('wss://hermes-production-04cd.up.railway.app/ws/live');
+      const ws = new WebSocket('wss://api.trade.miniforex786.win/ws/live');
       ws.onopen = () => console.log('WS connected');
       ws.onmessage = (event) => {
         try {
