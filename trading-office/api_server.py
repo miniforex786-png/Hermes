@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Union
 import boto3
 import pandas as pd
 from botocore.config import Config as BotoConfig
+import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException, Depends, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
