@@ -934,17 +934,16 @@
       const hour = now.getUTCHours();
       const minutes = now.getUTCMinutes();
       const seconds = now.getUTCSeconds();
-      const ms = now.getUTCMilliseconds();
 
-      let targetHour;
-      if (hour < 8) targetHour = 8;           // London open
-      else if (hour < 13) targetHour = 13;    // NY open
-      else if (hour < 16) targetHour = 16;    // Overlap end
-      else if (hour < 21) targetHour = 24;    // Next day Asia (midnight)
-      else targetHour = 24 + 8;               // Next day London
+      let targetHour, daysToAdd;
+      if (hour < 8) { targetHour = 8; daysToAdd = 0; }           // London today
+      else if (hour < 13) { targetHour = 13; daysToAdd = 0; }    // NY today
+      else if (hour < 16) { targetHour = 16; daysToAdd = 0; }    // Overlap ends, NY continues
+      else if (hour < 21) { targetHour = 0; daysToAdd = 1; }     // Midnight tomorrow (Asia)
+      else { targetHour = 8; daysToAdd = 1; }                    // London tomorrow
 
       const target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), targetHour, 0, 0));
-      if (targetHour >= 24) target.setUTCDate(target.getUTCDate() + 1);
+      if (daysToAdd > 0) target.setUTCDate(target.getUTCDate() + daysToAdd);
 
       const diff = target - now;
       if (diff <= 0) return '00:00:00';
