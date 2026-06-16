@@ -672,15 +672,19 @@ async def get_journal(_: bool = Depends(verify_api_key)):
             pass
 
     if trades_data:
+        import re as _re
         today_str = datetime.utcnow().strftime("%Y-%m-%d")
         all_trades = trades_data.get("trades", [])
-        # Filter today's XAUUSD OUT trades (completed positions)
-        today_out = [
+
+        # Filter today's XAUUSD trades
+        today_symbol = [
             t for t in all_trades
             if t.get("symbol") == "XAUUSD"
-            and t.get("entry") == "OUT"
             and t.get("time", "").startswith(today_str)
         ]
+        today_in = [t for t in today_symbol if t.get("entry") == "IN"]
+        today_out = [t for t in today_symbol if t.get("entry") == "OUT"]
+
         today_trades = len(today_out)
         today_wins = sum(1 for t in today_out if t.get("profit", 0) > 0)
         today_losses = sum(1 for t in today_out if t.get("profit", 0) <= 0)
@@ -688,24 +692,76 @@ async def get_journal(_: bool = Depends(verify_api_key)):
         win_rate = today_wins / today_trades if today_trades > 0 else 0.0
         avg_profit = total_profit / today_trades if today_trades > 0 else 0.0
 
-        # Estimate R as median winning trade profit (simple heuristic)
+        # Estimate R as median winning trade profit
         win_profits = [t.get("profit", 0) for t in today_out if t.get("profit", 0) > 0]
         r_estimate = sorted(win_profits)[len(win_profits)//2] if win_profits else 100.0
-
-        # Avg entry R: IN trades have 0 profit, so avg_entry_r ~ 0
-        # Avg exit R: profit / R estimate
         avg_exit_r = avg_profit / r_estimate if r_estimate > 0 else 0.0
 
-        # MFE/MAE: since all today's trades hit TP (comments show [tp ...]),
-        # they captured full favorable move with minimal adverse movement
-        if today_trades > 0:
-            tp_trades = sum(1 for t in today_out if "[tp" in t.get("comment", ""))
-            mfe_capture = (tp_trades / today_trades) * 100.0
-            # All TP trades had full favorable capture, no adverse beyond TP
-            mae_control = mfe_capture  # High control = all hit target
-        else:
-            mfe_capture = 0.0
-            mae_control = 0.0
+        # --- NEW: Real computable metrics ---
+        tp_trades = 0
+        total_slippage = 0.0
+        total_pts = 0.0
+        hold_times_min = []
+        used_ins = set()
+
+        # Match each OUT to its closest prior IN by ticket/time proximity
+        for out in sorted(today_out, key=lambda t: t.get("time", "")):
+            out_time_str = out.get("time", "")
+            out_price = out.get("price", 0) or 0
+            out_profit = out.get("profit", 0) or 0
+
+            # Extract TP price from comment
+            tp_match = _re.search(r'tp\s*([\d.]+)', out.get("comment", ""))
+            tp_price = float(tp_match.group(1)) if tp_match else None
+
+            # Slippage = exit vs TP
+            if tp_price and out_price:
+                slippage = abs(out_price - tp_price)
+            else:
+                slippage = 0.0
+
+            # Point gain (for BUY long: exit - entry; for SELL short: entry - exit)
+            pts_gained = 0.0
+
+            # Find closest IN before this OUT
+            best_in = None
+            best_delta = None
+            for inn in today_in:
+                in_idx = id(inn)
+                if in_idx in used_ins:
+                    continue
+                in_time_str = inn.get("time", "")
+                if in_time_str > out_time_str:
+                    continue
+                try:
+                    delta = (datetime.fromisoformat(out_time_str.replace("Z", "+00:00"))
+                             - datetime.fromisoformat(in_time_str.replace("Z", "+00:00"))).total_seconds()
+                except Exception:
+                    delta = None
+                if delta is not None and delta > 0 and (best_delta is None or delta < best_delta):
+                    best_in = inn
+                    best_delta = delta
+
+            if best_in:
+                used_ins.add(id(best_in))
+                entry_price = best_in.get("price", 0) or 0
+                if best_in.get("type") == "BUY":
+                    pts_gained = out_price - entry_price
+                else:
+                    pts_gained = entry_price - out_price
+                hold_times_min.append(best_delta / 60.0)
+            else:
+                pts_gained = abs(out_profit) / 20.0  # fallback: rough estimate
+
+            if tp_price is not None:
+                tp_trades += 1
+            total_slippage += slippage
+            total_pts += max(pts_gained, 0)
+
+        tp_hit_pct = (tp_trades / today_trades * 100.0) if today_trades > 0 else 0.0
+        avg_slippage_pts = total_slippage / today_trades if today_trades > 0 else 0.0
+        avg_pts = total_pts / today_trades if today_trades > 0 else 0.0
+        avg_hold_min = sum(hold_times_min) / len(hold_times_min) if hold_times_min else 0.0
 
         return {
             "today_trades": today_trades,
@@ -716,9 +772,11 @@ async def get_journal(_: bool = Depends(verify_api_key)):
             "avg_profit": round(avg_profit, 2),
             "avg_entry_r": 0.0,
             "avg_exit_r": round(avg_exit_r, 2),
-            "mfe_capture_pct": round(mfe_capture, 1),
-            "mae_control_pct": round(mae_control, 1),
             "r_estimate": round(r_estimate, 2),
+            "tp_hit_pct": round(tp_hit_pct, 1),
+            "avg_slippage_pts": round(avg_slippage_pts, 3),
+            "avg_hold_time_min": round(avg_hold_min, 1),
+            "avg_pts_gained": round(avg_pts, 2),
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "mock": False
         }

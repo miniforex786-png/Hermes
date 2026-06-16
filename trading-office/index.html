@@ -685,8 +685,8 @@
               <div class="monitor-header"><span>EXECUTION QUALITY</span><span class="monitor-dot"></span></div>
               <div class="monitor-row"><span class="monitor-label">AVG ENTRY</span><span class="monitor-value" id="journalAvgEntry">--</span></div>
               <div class="monitor-row"><span class="monitor-label">AVG EXIT</span><span class="monitor-value" id="journalAvgExit">--</span></div>
-              <div class="monitor-row"><span class="monitor-label">MFE CAPTURE</span><span class="monitor-value" id="journalMfe">--</span></div>
-              <div class="monitor-row"><span class="monitor-label">MAE CONTROL</span><span class="monitor-value" id="journalMae">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">TP HIT</span><span class="monitor-value" id="journalMfe">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">SLIPPAGE</span><span class="monitor-value" id="journalMae">--</span></div>
             </div>
           </div>
           <div class="desk-action">▶ TAG BEHAVIORAL PATTERN</div>
@@ -1229,8 +1229,8 @@
         exitEl.textContent = exit != null ? (exit >= 0 ? '+' : '') + exit.toFixed(1) + ' R' : '--';
         exitEl.className = 'monitor-value' + (exit >= 0 ? ' positive' : ' negative');
 
-        document.getElementById('journalMfe').textContent = data.mfe_capture_pct != null ? data.mfe_capture_pct.toFixed(0) + '%' : '--';
-        document.getElementById('journalMae').textContent = data.mae_control_pct != null ? data.mae_control_pct.toFixed(0) + '%' : '--';
+        document.getElementById('journalMfe').textContent = data.tp_hit_pct != null ? data.tp_hit_pct.toFixed(0) + '%' : '--';
+        document.getElementById('journalMae').textContent = data.avg_slippage_pts != null ? data.avg_slippage_pts.toFixed(2) + ' pts' : '--';
       }
     }
     fetchJournal();
