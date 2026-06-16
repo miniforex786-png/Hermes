@@ -519,6 +519,138 @@ async def get_pnl(_: bool = Depends(verify_api_key)):
         "mock": True
     }
 
+@app.get("/api/v1/sharpe")
+async def get_sharpe(_: bool = Depends(verify_api_key)):
+    """Calculate Sharpe Ratio from trade history."""
+    # Try R2 first, then local
+    trades_df = None
+    if r2_client:
+        try:
+            trades_data = await read_r2_json("trading_journal.json")
+            if trades_data:
+                trades = trades_data.get("trades", [])
+                out_trades = [t for t in trades if t.get("entry") == "OUT" and t.get("profit") is not None]
+                if out_trades:
+                    trades_df = pd.DataFrame(out_trades)
+        except Exception:
+            pass
+    
+    if trades_df is None:
+        # Fallback to local
+        try:
+            with open(DATA_ROOT / "trading_journal.json") as f:
+                trades_data = json.load(f)
+            trades = trades_data.get("trades", [])
+            out_trades = [t for t in trades if t.get("entry") == "OUT" and t.get("profit") is not None]
+            if out_trades:
+                trades_df = pd.DataFrame(out_trades)
+        except Exception:
+            pass
+    
+    if trades_df is None or trades_df.empty:
+        return {
+            "sharpe_ratio": 1.85,
+            "sortino_ratio": 2.41,
+            "periods_per_year": 252,
+            "days_analyzed": 90,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "mock": True
+        }
+    
+    # Calculate returns
+    returns = trades_df["profit"].values / 10000.0  # Normalize
+    if len(returns) < 2:
+        return {"error": "Insufficient trades", "mock": True}
+    
+    mean_return = np.mean(returns)
+    std_return = np.std(returns, ddof=1)
+    downside_returns = returns[returns < 0]
+    downside_std = np.std(downside_returns, ddof=1) if len(downside_returns) > 1 else std_return
+    
+    # Annualize (assuming daily trades)
+    periods = 252
+    sharpe = (mean_return * periods) / (std_return * np.sqrt(periods)) if std_return > 0 else 0
+    sortino = (mean_return * periods) / (downside_std * np.sqrt(periods)) if downside_std > 0 else 0
+    
+    return {
+        "sharpe_ratio": round(sharpe, 3),
+        "sortino_ratio": round(sortino, 3),
+        "mean_daily_return": round(mean_return, 6),
+        "volatility": round(std_return, 6),
+        "downside_volatility": round(downside_std, 6),
+        "total_trades": len(returns),
+        "periods_per_year": periods,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "mock": False
+    }
+
+@app.get("/api/v1/profit-factor")
+async def get_profit_factor(_: bool = Depends(verify_api_key)):
+    """Calculate Profit Factor from trade history."""
+    trades_df = None
+    if r2_client:
+        try:
+            trades_data = await read_r2_json("trading_journal.json")
+            if trades_data:
+                trades = trades_data.get("trades", [])
+                out_trades = [t for t in trades if t.get("entry") == "OUT" and t.get("profit") is not None]
+                if out_trades:
+                    trades_df = pd.DataFrame(out_trades)
+        except Exception:
+            pass
+    
+    if trades_df is None:
+        try:
+            with open(DATA_ROOT / "trading_journal.json") as f:
+                trades_data = json.load(f)
+            trades = trades_data.get("trades", [])
+            out_trades = [t for t in trades if t.get("entry") == "OUT" and t.get("profit") is not None]
+            if out_trades:
+                trades_df = pd.DataFrame(out_trades)
+        except Exception:
+            pass
+    
+    if trades_df is None or trades_df.empty:
+        return {
+            "profit_factor": 1.68,
+            "gross_profit": 45231.50,
+            "gross_loss": -26928.30,
+            "net_profit": 18303.20,
+            "total_trades": 266,
+            "winning_trades": 172,
+            "losing_trades": 94,
+            "win_rate": 0.647,
+            "avg_win": 262.97,
+            "avg_loss": -286.47,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "mock": True
+        }
+    
+    profits = trades_df[trades_df["profit"] > 0]["profit"]
+    losses = trades_df[trades_df["profit"] <= 0]["profit"]
+    
+    gross_profit = profits.sum()
+    gross_loss = abs(losses.sum())
+    net_profit = gross_profit - gross_loss
+    
+    profit_factor = gross_profit / gross_loss if gross_loss > 0 else float('inf')
+    
+    return {
+        "profit_factor": round(profit_factor, 3),
+        "gross_profit": round(gross_profit, 2),
+        "gross_loss": round(gross_loss, 2),
+        "net_profit": round(net_profit, 2),
+        "total_trades": len(trades_df),
+        "winning_trades": len(profits),
+        "losing_trades": len(losses),
+        "win_rate": round(len(profits) / len(trades_df), 4),
+        "avg_win": round(profits.mean(), 2) if len(profits) > 0 else 0,
+        "avg_loss": round(losses.mean(), 2) if len(losses) > 0 else 0,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "mock": False
+    }
+
+
 @app.get("/api/v1/campaigns")
 async def get_campaigns(_: bool = Depends(verify_api_key)):
     path = DATA_ROOT / "active_campaigns.json"
