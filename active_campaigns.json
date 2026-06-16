@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-06-15T23:54:23.697011Z",
+  "total_campaigns": 4,
+  "campaigns": {
+    "AUTO-0": {
+      "id": "AUTO-0",
+      "type": "auto",
+      "symbol": "",
+      "total_trades": 7,
+      "closed_trades": 4,
+      "total_pnl": -17.200000000000003,
+      "wins": 2,
+      "losses": 2,
+      "win_rate": 0.5,
+      "last_trade": "2026-06-09T15:28:39Z"
+    },
+    "PROBE-910001": {
+      "id": "PROBE-910001",
+      "type": "probe",
+      "symbol": "XAUUSD",
+      "total_trades": 133,
+      "closed_trades": 69,
+      "total_pnl": -68080.4,
+      "wins": 36,
+      "losses": 33,
+      "win_rate": 0.5217391304347826,
+      "last_trade": "2026-06-13T01:52:41Z"
+    },
+    "PROBE-20260304": {
+      "id": "PROBE-20260304",
+      "type": "probe",
+      "symbol": "XAUUSD",
+      "total_trades": 269,
+      "closed_trades": 138,
+      "total_pnl": 5397.2,
+      "wins": 95,
+      "losses": 43,
+      "win_rate": 0.6884057971014492,
+      "last_trade": "2026-06-13T01:52:41Z"
+    },
+    "PROBE-910002": {
+      "id": "PROBE-910002",
+      "type": "probe",
+      "symbol": "XAUUSD",
+      "total_trades": 137,
+      "closed_trades": 60,
+      "total_pnl": -6847.6,
+      "wins": 48,
+      "losses": 12,
+      "win_rate": 0.8,
+      "last_trade": "2026-06-16T02:47:21Z"
+    }
+  }
+}

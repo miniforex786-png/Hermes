@@ -1,15 +1,15 @@
 {
   "session_bias": {
-    "best": "London/NY",
-    "worst": "Asian"
+    "best": "Overlap",
+    "worst": "London"
   },
   "campaign_type": {
-    "probe": 0.6,
-    "discretionary": 1.4
+    "probe": -260.4149812734083,
+    "unknown": -4.300000000000001
   },
   "exit_tendency": "cuts_winners_early",
-  "runner_impact": "+0.3R",
+  "runner_impact": "+0.0R",
   "optimal_layers": 2,
-  "optimal_adds": 2,
+  "optimal_adds": 1,
   "risk_consistency": 0.92
 }

@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-06-16T00:10:26.237129Z",
+  "count": 2,
+  "positions": [
+    {
+      "ticket": 122750801,
+      "symbol": "XAUUSD",
+      "type": "BUY",
+      "volume": 0.2,
+      "price_open": 4358.52,
+      "price_current": 4316.26,
+      "sl": 0.0,
+      "tp": 4363.62,
+      "pnl": -845.2,
+      "swap": 0.0,
+      "comment": "MCopy:153072542:14498425714",
+      "magic": 910002,
+      "time_open": "2026-06-16T02:47:21Z",
+      "time_update": "2026-06-16T02:47:21Z"
+    },
+    {
+      "ticket": 123111053,
+      "symbol": "XAUUSD",
+      "type": "BUY",
+      "volume": 0.2,
+      "price_open": 4314.95,
+      "price_current": 4316.26,
+      "sl": 0.0,
+      "tp": 4320.03,
+      "pnl": 26.2,
+      "swap": 0.0,
+      "comment": "MCopy:153072542:14498791060",
+      "magic": 910002,
+      "time_open": "2026-06-16T10:26:50Z",
+      "time_update": "2026-06-16T10:26:50Z"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "type": "post",
+  "phase": "POST",
+  "session": "NY",
+  "message": "Campaign -0.8R - revenge trade avoided. Cooldown respected.",
+  "timestamp": "2026-06-15T22:52:19.928878Z",
+  "meta": {
+    "session": "NY",
+    "hour": 22,
+    "conf": 7.6436625957323905
+  }
+}

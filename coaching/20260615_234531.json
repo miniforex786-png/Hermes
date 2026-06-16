@@ -1,0 +1,12 @@
+{
+  "type": "during",
+  "phase": "DURING",
+  "session": "NY",
+  "message": "Price respecting H1 50% - your H4 runner thesis intact",
+  "timestamp": "2026-06-15T23:45:31.471861Z",
+  "meta": {
+    "session": "NY",
+    "hour": 23,
+    "conf": 8.000726351059802
+  }
+}

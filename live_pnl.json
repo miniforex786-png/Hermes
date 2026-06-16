@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-16T00:10:30.144282Z",
+  "net_pnl": -821.4,
+  "realized_pnl": 307.0,
+  "unrealized_pnl": -821.4,
+  "equity": 129630.6,
+  "balance": 130452.0,
+  "max_drawdown_pct": 0,
+  "risk_used_pct": 0.3,
+  "daily_pnl": 307.0,
+  "weekly_pnl": -70615.4,
+  "monthly_pnl": 130452.0,
+  "open_positions": 0,
+  "mock": false
+}

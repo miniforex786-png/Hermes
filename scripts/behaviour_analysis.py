@@ -6,17 +6,54 @@ import json
 from pathlib import Path
 
 DATA_ROOT = Path(r"C:\Hermes")
-JOURNAL_FILE = DATA_ROOT / "trading_journal.json"  # Expected from MT5 export
+JOURNAL_FILE = DATA_ROOT / "trading_journal.json"
 OUT_DIR = DATA_ROOT / "behaviour_analysis" / "outputs"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+def load_journal_to_df() -> pd.DataFrame:
+    with open(JOURNAL_FILE) as f:
+        data = json.load(f)
+    
+    trades = data.get("trades", [])
+    if not trades:
+        return pd.DataFrame()
+    
+    rows = []
+    for t in trades:
+        if t.get("entry") == "OUT":
+            pnl = t.get("profit", 0)
+            time_str = t.get("time", "")
+            try:
+                ts = pd.Timestamp(time_str)
+            except:
+                ts = pd.Timestamp.now()
+            comment = t.get("comment", "")
+            magic = t.get("magic", 0)
+            
+            rows.append({
+                "timestamp": ts,
+                "pnl": pnl,
+                "comment": comment,
+                "magic": magic,
+                "symbol": t.get("symbol", "XAUUSD"),
+                "type": t.get("type", ""),
+                "volume": t.get("volume", 0),
+            })
+    
+    if not rows:
+        return pd.DataFrame()
+    
+    df = pd.DataFrame(rows)
+    df.set_index("timestamp", inplace=True)
+    df.sort_index(inplace=True)
+    return df
+
 def analyze_behaviour(journal_df: pd.DataFrame) -> dict:
-    """Analyze behavioural patterns from trade journal."""
     if journal_df.empty:
         return {}
     
     # Session bias
-    journal_df["session"] = journal_df.index.hour.apply(lambda h: 
+    journal_df["session"] = journal_df.index.to_series().dt.hour.apply(lambda h: 
         "Asian" if 0 <= h < 7 else
         "London" if 7 <= h < 12 else
         "NY" if 12 <= h < 17 else "Overlap"
@@ -26,26 +63,29 @@ def analyze_behaviour(journal_df: pd.DataFrame) -> dict:
     worst_session = session_pnl.idxmin() if not session_pnl.empty else "Asian"
     
     # Campaign type performance
-    journal_df["campaign_type"] = journal_df.get("comment", "").apply(
-        lambda c: "probe" if "SAG" in str(c) or "102432419" in str(c) else
-        "discretionary" if "153072542" in str(c) else "unknown"
+    journal_df["campaign_type"] = journal_df.apply(
+        lambda r: "probe" if "SAG" in str(r.get("comment", "")) or "102432419" in str(r.get("comment", "")) else
+        "discretionary" if "153072542" in str(r.get("comment", "")) else
+        "probe" if r.get("magic", 0) > 100000 else "unknown", axis=1
     )
     campaign_pnl = journal_df.groupby("campaign_type")["pnl"].mean()
     
     # Exit tendency
     winners = journal_df[journal_df["pnl"] > 0]
     losers = journal_df[journal_df["pnl"] <= 0]
-    avg_winner_hold = winners["duration_min"].mean() if "duration_min" in winners.columns else 0
-    avg_loser_hold = losers["duration_min"].mean() if "duration_min" in losers.columns else 0
-    
-    if avg_winner_hold < avg_loser_hold * 0.7:
-        exit_tendency = "cuts_winners_early"
-    elif avg_winner_hold > avg_loser_hold * 1.5:
-        exit_tendency = "holds_winners"
+    if len(winners) > 0 and len(losers) > 0:
+        avg_winner_eff = winners["pnl"].mean() / (winners["volume"].mean() or 1)
+        avg_loser_eff = abs(losers["pnl"].mean()) / (losers["volume"].mean() or 1)
+        if avg_winner_eff < avg_loser_eff * 0.7:
+            exit_tendency = "cuts_winners_early"
+        elif avg_winner_eff > avg_loser_eff * 1.5:
+            exit_tendency = "holds_winners"
+        else:
+            exit_tendency = "balanced"
     else:
-        exit_tendency = "balanced"
+        exit_tendency = "unknown"
     
-    # Runner impact
+    # Runner impact / layers
     if "layers" in journal_df.columns:
         runner_pnl = journal_df[journal_df["layers"] > 1]["pnl"].sum()
         base_pnl = journal_df[journal_df["layers"] == 1]["pnl"].sum()
@@ -81,7 +121,6 @@ def main():
     
     if not JOURNAL_FILE.exists():
         print(f"Journal file not found: {JOURNAL_FILE}")
-        # Create mock output for testing
         result = {
             "session_bias": {"best": "London/NY", "worst": "Asian"},
             "campaign_type": {"probe": 0.6, "discretionary": 1.4},
@@ -92,8 +131,8 @@ def main():
             "risk_consistency": 0.92
         }
     else:
-        journal_df = pd.read_json(JOURNAL_FILE)
-        result = analyze_behaviour(journal_df)
+        journal_df = load_journal_to_df()
+        result = analyze_behaviour(journal_df) if (journal_df := load_journal_to_df()) is not None else {}
     
     out_file = OUT_DIR / "behaviour_summary.json"
     with open(out_file, "w") as f:

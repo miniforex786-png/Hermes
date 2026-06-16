@@ -1,0 +1,12 @@
+{
+  "type": "during",
+  "phase": "DURING",
+  "session": "NY",
+  "message": "Partial at 1.5R left runner - max runner was +3.2R last month",
+  "timestamp": "2026-06-15T23:15:28.190768Z",
+  "meta": {
+    "session": "NY",
+    "hour": 23,
+    "conf": 7.549127146703674
+  }
+}

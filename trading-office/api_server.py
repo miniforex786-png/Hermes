@@ -248,6 +248,7 @@ async def system_health(_: bool = Depends(verify_api_key)):
         "setups": "edge_discovery/XAUUSD_setup_labels.parquet",
         "behaviour": "behaviour_analysis/outputs/behaviour_summary.json",
         "aligned": "aligned_data/XAUUSD_M12_aligned.parquet",
+        "risk_guardian": "risk_guardian/state.json",
     }
 
     max_age = 0
@@ -255,12 +256,9 @@ async def system_health(_: bool = Depends(verify_api_key)):
     for name, key in key_files.items():
         age = None
         if r2_client:
-            import asyncio
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    age = loop.run_until_complete(read_r2_file_age(key))
-            except RuntimeError:
+                age = await read_r2_file_age(key)
+            except Exception:
                 pass
         if age is None:
             path = DATA_ROOT / key
@@ -305,15 +303,25 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
 
     logger.debug("=== ENTERING get_confluence endpoint ===")
     try:
-        path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
-        logger.debug(f"Confluence path: {path}")
-        logger.debug(f"Path exists: {path.exists()}")
-
-        df = read_parquet_safe(path)
-        logger.debug(f"read_parquet_safe returned: {df is not None}")
-        logger.debug(f"df is None: {df is None}")
-        if df is not None:
-            logger.debug(f"df.empty: {df.empty}")
+        # Try R2 first
+        df = None
+        if r2_client:
+            try:
+                import io
+                response = r2_client.get_object(Bucket=R2_BUCKET, Key="confluence_score/XAUUSD_confluence_score.parquet")
+                body = response["Body"].read()
+                df = pd.read_parquet(io.BytesIO(body))
+                logger.debug(f"Read from R2: {df.shape}")
+            except Exception as e:
+                logger.debug(f"R2 read failed: {e}")
+        
+        # Fallback to local
+        if df is None or df.empty:
+            path = DATA_ROOT / "confluence_score" / "XAUUSD_confluence_score.parquet"
+            logger.debug(f"Confluence path: {path}")
+            logger.debug(f"Path exists: {path.exists()}")
+            df = read_parquet_safe(path)
+            logger.debug(f"read_parquet_safe returned: {df is not None}")
 
         if df is None or df.empty:
             logger.debug("Returning mock data")
@@ -344,7 +352,8 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
                 "session_favorability": float(latest.get("session_favorability", 0)),
                 "structure_score": float(latest.get("structure_score", 0)),
             },
-            "timestamp": str(latest.name) if hasattr(latest, 'name') else datetime.utcnow().isoformat()
+            "timestamp": str(latest.name) if hasattr(latest, 'name') else datetime.utcnow().isoformat(),
+            "mock": False
         }
     except Exception as e:
         logger.error(f"Exception in get_confluence: {e}", exc_info=True)
@@ -432,12 +441,9 @@ async def get_risk(_: bool = Depends(verify_api_key)):
     path = DATA_ROOT / "risk_guardian" / "state.json"
     data = None
     if r2_client:
-        import asyncio
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                data = loop.run_until_complete(read_r2_json("risk_guardian/state.json"))
-        except RuntimeError:
+            data = await read_r2_json("risk_guardian/state.json")
+        except Exception:
             pass
     if data is None and path.exists():
         try:
@@ -481,12 +487,9 @@ async def get_pnl(_: bool = Depends(verify_api_key)):
     path = DATA_ROOT / "live_pnl.json"
     data = None
     if r2_client:
-        import asyncio
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                data = loop.run_until_complete(read_r2_json("live_pnl.json"))
-        except RuntimeError:
+            data = await read_r2_json("live_pnl.json")
+        except Exception:
             pass
     if data is None and path.exists():
         try:
@@ -521,12 +524,9 @@ async def get_campaigns(_: bool = Depends(verify_api_key)):
     path = DATA_ROOT / "active_campaigns.json"
     data = None
     if r2_client:
-        import asyncio
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                data = loop.run_until_complete(read_r2_json("active_campaigns.json"))
-        except RuntimeError:
+            data = await read_r2_json("active_campaigns.json")
+        except Exception:
             pass
     if data is None and path.exists():
         try:
@@ -555,12 +555,9 @@ async def get_behaviour(_: bool = Depends(verify_api_key)):
     path = DATA_ROOT / "behaviour_analysis" / "outputs" / "behaviour_summary.json"
     data = None
     if r2_client:
-        import asyncio
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                data = loop.run_until_complete(read_r2_json("behaviour_analysis/outputs/behaviour_summary.json"))
-        except RuntimeError:
+            data = await read_r2_json("behaviour_analysis/outputs/behaviour_summary.json")
+        except Exception:
             pass
     if data is None and path.exists():
         try:
@@ -586,25 +583,21 @@ async def get_behaviour(_: bool = Depends(verify_api_key)):
 
 @app.get("/api/v1/coaching")
 async def get_coaching(_: bool = Depends(verify_api_key)):
-    data = None
     if r2_client:
-        import asyncio
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                response = r2_client.list_objects_v2(Bucket=R2_BUCKET, Prefix="coaching/")
-                if "Contents" in response:
-                    signals = []
-                    for obj in sorted(response["Contents"], key=lambda x: x["Key"])[-10:]:
-                        try:
-                            obj_data = await read_r2_json(obj["Key"])
-                            if obj_data:
-                                signals.append(obj_data)
-                        except Exception:
-                            pass
-                    if signals:
-                        return {"signals": signals, "count": len(signals), "mock": False}
-        except RuntimeError:
+            response = r2_client.list_objects_v2(Bucket=R2_BUCKET, Prefix="coaching/")
+            if "Contents" in response:
+                signals = []
+                for obj in sorted(response["Contents"], key=lambda x: x["Key"])[-10:]:
+                    try:
+                        obj_data = await read_r2_json(obj["Key"])
+                        if obj_data:
+                            signals.append(obj_data)
+                    except Exception:
+                        pass
+                if signals:
+                    return {"signals": signals, "count": len(signals), "mock": False}
+        except Exception:
             pass
 
     coaching_dir = DATA_ROOT / "coaching"
@@ -652,12 +645,9 @@ async def fetch_live_snapshot() -> dict:
         pnl_path = DATA_ROOT / "live_pnl.json"
         data = None
         if r2_client:
-            import asyncio
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    data = loop.run_until_complete(read_r2_json("live_pnl.json"))
-            except RuntimeError:
+                data = await read_r2_json("live_pnl.json")
+            except Exception:
                 pass
         if data is None and pnl_path.exists():
             with open(pnl_path) as f:
@@ -671,12 +661,9 @@ async def fetch_live_snapshot() -> dict:
         risk_path = DATA_ROOT / "risk_guardian" / "state.json"
         data = None
         if r2_client:
-            import asyncio
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    data = loop.run_until_complete(read_r2_json("risk_guardian/state.json"))
-            except RuntimeError:
+                data = await read_r2_json("risk_guardian/state.json")
+            except Exception:
                 pass
         if data is None and risk_path.exists():
             with open(risk_path) as f:

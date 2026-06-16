@@ -1,0 +1,12 @@
+{
+  "type": "pre_entry",
+  "phase": "PRE_ENTRY",
+  "session": "NY",
+  "message": "London open + H1 trend alignment + low vol = high prob entry. Confidence: 8.2/10",
+  "timestamp": "2026-06-15T23:00:33.305925Z",
+  "meta": {
+    "session": "NY",
+    "hour": 23,
+    "conf": 8.231016043273236
+  }
+}

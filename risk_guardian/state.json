@@ -1,13 +1,13 @@
 {
-  "daily_loss_pct": -1.2,
+  "daily_loss_pct": 0.0,
   "daily_limit_pct": -2.5,
-  "position_size_pct": 3.4,
+  "position_size_pct": 0,
   "position_limit_pct": 5.0,
   "correlation": 0.34,
   "correlation_limit": 0.7,
-  "drawdown_pct": 2.1,
+  "drawdown_pct": 0,
   "drawdown_limit_pct": 10.0,
-  "escalation_level": 1,
+  "escalation_level": 0,
   "escalation_ladder": [
     {
       "level": 1,
@@ -41,5 +41,5 @@
     "runner_hold_enabled": true,
     "revenge_cooldown_min": 15
   },
-  "timestamp": "2026-06-15T07:22:11.968851Z"
+  "timestamp": "2026-06-16T00:10:25.828718Z"
 }
