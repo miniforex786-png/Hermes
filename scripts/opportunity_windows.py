@@ -14,38 +14,40 @@ def calculate_stats(df: pd.DataFrame) -> dict:
     stats = {}
     
     # Session stats
-    df["session"] = df.index.hour.apply(lambda h: 
-        "ASIA" if 0 <= h < 7 else
-        "LONDON" if 7 <= h < 12 else
-        "NY" if 12 <= h < 17 else
-        "OVERLAP" if 17 <= h < 19 else "NY"
-    )
+    hour = df.index.hour
+    df["session"] = "NY"
+    df.loc[hour < 7, "session"] = "ASIA"
+    df.loc[(hour >= 7) & (hour < 12), "session"] = "LONDON"
+    df.loc[(hour >= 12) & (hour < 17), "session"] = "NY"
+    df.loc[(hour >= 17) & (hour < 19), "session"] = "OVERLAP"
     session_stats = df.groupby("session").agg(
-        win_rate=("fwd_return_30m", lambda x: (x > 0).mean()),
-        avg_r=("fwd_return_30m", "mean"),
-        count=("fwd_return_30m", "count"),
-        expectancy=("fwd_return_30m", lambda x: (x > 0).sum() / len(x) * x[x > 0].mean() + (x <= 0).sum() / len(x) * x[x <= 0].mean() if len(x) > 0 else 0)
+        win_rate=("30m", lambda x: (x > 0).mean()),
+        avg_r=("30m", "mean"),
+        count=("30m", "count"),
+        expectancy=("30m", lambda x: (x > 0).sum() / len(x) * x[x > 0].mean() + (x <= 0).sum() / len(x) * x[x <= 0].mean() if len(x) > 0 else 0)
     ).round(4)
     stats["session"] = session_stats.reset_index().to_dict('records')
     
     # DOW stats
-    df["dow"] = df.index.dayofweek.map({0: "MONDAY", 1: "TUESDAY", 2: "WEDNESDAY", 3: "THURSDAY", 4: "FRIDAY", 5: "SATURDAY", 6: "SUNDAY"})
+    df["dow"] = df.index.dayofweek
+    dow_map = {0: "MONDAY", 1: "TUESDAY", 2: "WEDNESDAY", 3: "THURSDAY", 4: "FRIDAY", 5: "SATURDAY", 6: "SUNDAY"}
+    df["dow"] = df["dow"].map(dow_map)
     dow_stats = df.groupby("dow").agg(
-        win_rate=("fwd_return_30m", lambda x: (x > 0).mean()),
-        avg_r=("fwd_return_30m", "mean"),
-        count=("fwd_return_30m", "count")
+        win_rate=("30m", lambda x: (x > 0).mean()),
+        avg_r=("30m", "mean"),
+        count=("30m", "count")
     ).round(4)
     stats["dow"] = dow_stats.reset_index().to_dict('records')
     
-    # Context stats (volatility regime + trend)
-    df["context"] = df.apply(lambda r: 
-        "QUIET_TREND" if r.get("volatility_regime", 0) > 0.7 and r.get("trend_alignment", 0) > 0.6 else
-        "ELEVATED_RANGE" if r.get("volatility_regime", 0) > 0.5 else
-        "EXTREME_BREAKOUT", axis=1)
+    # Context stats (confluence regime)
+    score = df["confluence_score"]
+    df["context"] = "LOW_CONFLUENCE"
+    df.loc[score >= 70, "context"] = "HIGH_CONFLUENCE"
+    df.loc[(score >= 55) & (score < 70), "context"] = "MODERATE"
     context_stats = df.groupby("context").agg(
-        win_rate=("fwd_return_30m", lambda x: (x > 0).mean()),
-        avg_r=("fwd_return_30m", "mean"),
-        count=("fwd_return_30m", "count")
+        win_rate=("30m", lambda x: (x > 0).mean()),
+        avg_r=("30m", "mean"),
+        count=("30m", "count")
     ).round(4)
     stats["context"] = context_stats.reset_index().to_dict('records')
     
@@ -76,9 +78,9 @@ def main():
                 {"dow": "FRIDAY", "win_rate": 0.63, "avg_r": 0.51, "count": 167}
             ],
             "context": [
-                {"context": "QUIET_TREND", "win_rate": 0.72, "avg_r": 0.78, "count": 145},
-                {"context": "ELEVATED_RANGE", "win_rate": 0.68, "avg_r": 0.65, "count": 234},
-                {"context": "EXTREME_BREAKOUT", "win_rate": 0.58, "avg_r": 1.12, "count": 89}
+                {"context": "HIGH_CONFLUENCE", "win_rate": 0.72, "avg_r": 0.78, "count": 145},
+                {"context": "MODERATE", "win_rate": 0.68, "avg_r": 0.65, "count": 234},
+                {"context": "LOW_CONFLUENCE", "win_rate": 0.58, "avg_r": 1.12, "count": 89}
             ]
         }
     else:
