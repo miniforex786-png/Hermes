@@ -1412,8 +1412,8 @@
       });
       drawChart();
 
-      // Update desk monitors with new mock data (exclude countdown/timer elements)
-      const excludeIds = ['sessionCountdown', 'nextSession', 'currentSession', 'volRegime', 'confluenceTime', 'timeDisplay'];
+      // Update desk monitors with new mock data (exclude countdown/timer/confluence elements)
+      const excludeIds = ['sessionCountdown', 'nextSession', 'currentSession', 'volRegime', 'confluenceTime', 'timeDisplay', 'confluenceScore', 'confluenceTier', 'activeSetups'];
       document.querySelectorAll('.monitor-value').forEach(el => {
         if (excludeIds.includes(el.id)) return;
         if (el.textContent.includes('%') || el.textContent.includes('R')) return;
