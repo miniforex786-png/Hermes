@@ -676,17 +676,17 @@
           <div class="desk-monitors">
             <div class="monitor">
               <div class="monitor-header"><span>TODAY'S LOG</span><span class="monitor-dot"></span></div>
-              <div class="monitor-row"><span class="monitor-label">TRADES</span><span class="monitor-value">14</span></div>
-              <div class="monitor-row"><span class="monitor-label">WINS</span><span class="monitor-value positive">9</span></div>
-              <div class="monitor-row"><span class="monitor-label">LOSSES</span><span class="monitor-value negative">5</span></div>
-              <div class="monitor-row"><span class="monitor-label">WIN RATE</span><span class="monitor-value positive">64.3%</span></div>
+              <div class="monitor-row"><span class="monitor-label">TRADES</span><span class="monitor-value" id="journalTrades">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">WINS</span><span class="monitor-value" id="journalWins">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">LOSSES</span><span class="monitor-value" id="journalLosses">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">WIN RATE</span><span class="monitor-value" id="journalWinRate">--</span></div>
             </div>
             <div class="monitor">
               <div class="monitor-header"><span>EXECUTION QUALITY</span><span class="monitor-dot"></span></div>
-              <div class="monitor-row"><span class="monitor-label">AVG ENTRY</span><span class="monitor-value positive">+0.3 R</span></div>
-              <div class="monitor-row"><span class="monitor-label">AVG EXIT</span><span class="monitor-value negative">-0.1 R</span></div>
-              <div class="monitor-row"><span class="monitor-label">MFE CAPTURE</span><span class="monitor-value">72%</span></div>
-              <div class="monitor-row"><span class="monitor-label">MAE CONTROL</span><span class="monitor-value positive">88%</span></div>
+              <div class="monitor-row"><span class="monitor-label">AVG ENTRY</span><span class="monitor-value" id="journalAvgEntry">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">AVG EXIT</span><span class="monitor-value" id="journalAvgExit">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">MFE CAPTURE</span><span class="monitor-value" id="journalMfe">--</span></div>
+              <div class="monitor-row"><span class="monitor-label">MAE CONTROL</span><span class="monitor-value" id="journalMae">--</span></div>
             </div>
           </div>
           <div class="desk-action">▶ TAG BEHAVIORAL PATTERN</div>
@@ -894,6 +894,22 @@
         return null;
       }
     }
+
+    // ===== PIPELINE STATUS =====
+    async function checkPipelineStatus() {
+      try {
+        const data = await apiGet('/health');
+        if (data && data.status === 'healthy') {
+          const statusEl = document.getElementById('pipelineStatus');
+          statusEl.textContent = 'PIPELINE: HEALTHY';
+          document.getElementById('pipelineDot').className = 'pipeline-dot healthy';
+        }
+      } catch (e) {
+        // Stay on CONNECTING
+      }
+    }
+    setTimeout(checkPipelineStatus, 2000);
+    setInterval(checkPipelineStatus, 60000);
 
     // ===== TIME DISPLAY =====
     function updateTime() {
@@ -1185,6 +1201,41 @@
     fetchRisk();
     setInterval(fetchRisk, 15000);
 
+    // ===== TRADING JOURNAL =====
+    async function fetchJournal() {
+      const data = await apiGet('/journal');
+      if (data) {
+        document.getElementById('journalTrades').textContent = data.today_trades ?? '--';
+        const winsEl = document.getElementById('journalWins');
+        winsEl.textContent = data.today_wins ?? '--';
+        winsEl.className = 'monitor-value' + (data.today_wins > 0 ? ' positive' : '');
+
+        const lossesEl = document.getElementById('journalLosses');
+        lossesEl.textContent = data.today_losses ?? '--';
+        lossesEl.className = 'monitor-value' + (data.today_losses > 0 ? ' negative' : '');
+
+        const wrEl = document.getElementById('journalWinRate');
+        const wr = data.win_rate;
+        wrEl.textContent = wr != null ? (wr * 100).toFixed(1) + '%' : '--';
+        wrEl.className = 'monitor-value' + (wr >= 0.5 ? ' positive' : ' negative');
+
+        const entryEl = document.getElementById('journalAvgEntry');
+        const entry = data.avg_entry_r;
+        entryEl.textContent = entry != null ? (entry >= 0 ? '+' : '') + entry.toFixed(1) + ' R' : '--';
+        entryEl.className = 'monitor-value' + (entry >= 0 ? ' positive' : ' negative');
+
+        const exitEl = document.getElementById('journalAvgExit');
+        const exit = data.avg_exit_r;
+        exitEl.textContent = exit != null ? (exit >= 0 ? '+' : '') + exit.toFixed(1) + ' R' : '--';
+        exitEl.className = 'monitor-value' + (exit >= 0 ? ' positive' : ' negative');
+
+        document.getElementById('journalMfe').textContent = data.mfe_capture_pct != null ? data.mfe_capture_pct.toFixed(0) + '%' : '--';
+        document.getElementById('journalMae').textContent = data.mae_control_pct != null ? data.mae_control_pct.toFixed(0) + '%' : '--';
+      }
+    }
+    fetchJournal();
+    setInterval(fetchJournal, 30000);
+
     // ===== WEBSOCKET - LIVE UPDATES =====
     function connectWebSocket() {
       const ws = new WebSocket('wss://hermes-production-04cd.up.railway.app/ws/live');
@@ -1401,10 +1452,12 @@
       const svg = refreshIndicator.querySelector('svg');
       if (svg) svg.style.color = '#2ed573';
 
-      // Reload data (simulate)
+      // Reload data
       fetchPnl();
       fetchConfluence();
       fetchRisk();
+      fetchJournal();
+      checkPipelineStatus();
       // Re-animate chart
       pnlData.forEach((_, i, arr) => {
         arr[i] = arr[i] + (Math.random() - 0.5) * 5;
