@@ -100,13 +100,40 @@ def main():
         )
         df["atr"] = df["tr"].rolling(14).mean()
     
-    # Add H4, H6, D1 data if available
+    # Add H4, H6, D1 data if available (forward-fill from higher TF to M12)
     for tf in ["H4", "H6", "D1"]:
         tf_file = ALIGNED_DIR / f"XAUUSD_{tf}_aligned.parquet"
         if tf_file.exists():
             tf_df = pd.read_parquet(tf_file)
-            tf_df = tf_df.add_prefix(f"{tf}_")
-            df = df.join(tf_df, how="left")
+            # Forward-fill higher-TF OHLC to every M12 timestamp
+            for col in ["close", "high", "low", "open"]:
+                src_col = f"{tf}_{col}"
+                df[src_col] = tf_df[col].reindex(
+                    df.index, method='ffill',
+                    tolerance=pd.Timedelta(hours=12)
+                )
+            # Compute SMA20 on forward-filled higher-TF close for trend comparison
+            df[f"{tf}_sma_20"] = df[f"{tf}_close"].rolling(20).mean()
+    
+    # Compute ATR at H1 and H4 native resolution for volatility regime
+    for tf in ["H1", "H4"]:
+        tf_file = ALIGNED_DIR / f"XAUUSD_{tf}_aligned.parquet"
+        if tf_file.exists():
+            tf_df = pd.read_parquet(tf_file)
+            # ATR = rolling 14-period mean of True Range
+            tf_df["tr"] = np.maximum(
+                tf_df["high"] - tf_df["low"],
+                np.maximum(
+                    np.abs(tf_df["high"] - tf_df["close"].shift(1)),
+                    np.abs(tf_df["low"] - tf_df["close"].shift(1))
+                )
+            )
+            tf_df[f"{tf}_atr"] = tf_df["tr"].rolling(14).mean()
+            # Forward-fill ATR to every M12 timestamp
+            df[f"{tf}_atr"] = tf_df[f"{tf}_atr"].reindex(
+                df.index, method='ffill',
+                tolerance=pd.Timedelta(hours=12)
+            )
     
     # Calculate confluence for last 100 bars
     results = []

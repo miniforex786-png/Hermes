@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 
 DATA_ROOT = Path(r"C:\Hermes")
-MT5_DIR = DATA_ROOT / "mt5_data_full"
+MT5_DIR = DATA_ROOT / "mt5_data"
 OUT_DIR = DATA_ROOT / "aligned_data"
 OUT_DIR.mkdir(exist_ok=True)
 
@@ -30,7 +30,7 @@ def resample_to_tf(df: pd.DataFrame, tf: str) -> pd.DataFrame:
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     elif tf == "D1":
-        return df.resample("1d").agg({
+        return df.resample("1D").agg({
             "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"
         }).dropna()
     return df
