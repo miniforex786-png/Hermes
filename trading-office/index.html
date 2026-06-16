@@ -904,6 +904,96 @@
     updateTime();
     setInterval(updateTime, 1000);
 
+    // ===== SESSION TIMERS (Observer Desk) =====
+    const SESSIONS = [
+      { name: 'ASIA', start: 0, end: 8 },      // 00:00–08:00 UTC
+      { name: 'LONDON', start: 8, end: 16 },   // 08:00–16:00 UTC
+      { name: 'NY', start: 13, end: 21 },      // 13:00–21:00 UTC (overlaps London)
+    ];
+
+    function getCurrentSession(now) {
+      const hour = now.getUTCHours();
+      // Check for overlap first (London + NY = 13:00–16:00)
+      if (hour >= 13 && hour < 16) return 'OVERLAP';
+      for (const s of SESSIONS) {
+        if (hour >= s.start && hour < s.end) return s.name;
+      }
+      return 'ASIA';
+    }
+
+    function getNextSession(now) {
+      const hour = now.getUTCHours();
+      if (hour < 8) return 'LONDON';
+      if (hour < 13) return 'NY';
+      if (hour < 16) return 'NY'; // Overlap ends, NY continues
+      if (hour < 21) return 'ASIA'; // NY ends, next day Asia
+      return 'LONDON'; // After 21:00, next is Asia then London
+    }
+
+    function getTimeUntilNextSession(now) {
+      const hour = now.getUTCHours();
+      const minutes = now.getUTCMinutes();
+      const seconds = now.getUTCSeconds();
+      const ms = now.getUTCMilliseconds();
+
+      let targetHour;
+      if (hour < 8) targetHour = 8;           // London open
+      else if (hour < 13) targetHour = 13;    // NY open
+      else if (hour < 16) targetHour = 16;    // Overlap end
+      else if (hour < 21) targetHour = 24;    // Next day Asia (midnight)
+      else targetHour = 24 + 8;               // Next day London
+
+      const target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), targetHour, 0, 0));
+      if (targetHour >= 24) target.setUTCDate(target.getUTCDate() + 1);
+
+      const diff = target - now;
+      if (diff <= 0) return '00:00:00';
+
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function getVolRegime(now) {
+      const hour = now.getUTCHours();
+      // Simplified volatility regime based on session
+      if (hour >= 13 && hour < 16) return 'ELEVATED'; // Overlap = highest vol
+      if ((hour >= 8 && hour < 13) || (hour >= 16 && hour < 21)) return 'ACTIVE'; // London or NY
+      return 'QUIET'; // Asia
+    }
+
+    function updateSessionTimers() {
+      const now = new Date();
+      const current = getCurrentSession(now);
+      const next = getNextSession(now);
+      const countdown = getTimeUntilNextSession(now);
+      const volRegime = getVolRegime(now);
+
+      // Update Observer desk elements
+      const currentEl = document.getElementById('currentSession');
+      const nextEl = document.getElementById('nextSession');
+      const countdownEl = document.getElementById('sessionCountdown');
+      const volRegimeEl = document.getElementById('volRegime');
+
+      if (currentEl) currentEl.textContent = current;
+      if (nextEl) nextEl.textContent = next;
+      if (countdownEl) countdownEl.textContent = countdown;
+      if (volRegimeEl) volRegimeEl.textContent = volRegime;
+
+      // Update confluence "NEXT UPDATE" timer (based on 15s fetch interval)
+      const confluenceTimeEl = document.getElementById('confluenceTime');
+      if (confluenceTimeEl) {
+        const secondsSinceFetch = Math.floor((Date.now() - (window.__lastConfluenceFetch || 0)) / 1000);
+        const nextUpdateIn = Math.max(0, 15 - secondsSinceFetch);
+        confluenceTimeEl.textContent = `${nextUpdateIn}s`;
+      }
+    }
+
+    // Initialize and run every second
+    updateSessionTimers();
+    setInterval(updateSessionTimers, 1000);
+
     // ===== P&L CHART =====
     const chartCanvas = document.getElementById('pnlChart');
     const ctx = chartCanvas.getContext('2d');
@@ -1072,6 +1162,8 @@
         document.getElementById('activeSetups').textContent = setups;
         document.getElementById('confluenceDot').classList.toggle('positive', data.tier?.includes('LONG'));
         document.getElementById('confluenceDot').classList.toggle('negative', data.tier?.includes('SHORT'));
+        // Track last fetch for "NEXT UPDATE" countdown
+        window.__lastConfluenceFetch = Date.now();
       }
     }
     fetchConfluence();
@@ -1104,6 +1196,8 @@
           if (data.confluence) {
             document.getElementById('confluenceScore').textContent = data.confluence.score?.toFixed(1) ?? '--';
             document.getElementById('confluenceTier').textContent = data.confluence.tier ?? '--';
+            // Track last fetch for "NEXT UPDATE" countdown
+            window.__lastConfluenceFetch = Date.now();
           }
           if (data.pnl) {
             basePnl = data.pnl.net_pnl;
@@ -1307,7 +1401,7 @@
       refreshIndicator.style.borderTopColor = '#2ed573';
       const svg = refreshIndicator.querySelector('svg');
       if (svg) svg.style.color = '#2ed573';
-      
+
       // Reload data (simulate)
       fetchPnl();
       fetchConfluence();
@@ -1317,16 +1411,21 @@
         arr[i] = arr[i] + (Math.random() - 0.5) * 5;
       });
       drawChart();
-      
-      // Update desk monitors with new mock data
+
+      // Update desk monitors with new mock data (exclude countdown/timer elements)
+      const excludeIds = ['sessionCountdown', 'nextSession', 'currentSession', 'volRegime', 'confluenceTime', 'timeDisplay'];
       document.querySelectorAll('.monitor-value').forEach(el => {
+        if (excludeIds.includes(el.id)) return;
         if (el.textContent.includes('%') || el.textContent.includes('R')) return;
         const val = parseFloat(el.textContent.replace(/[$,]/g, ''));
         if (!isNaN(val)) {
           el.textContent = formatCurrency(val + (Math.random() - 0.5) * 100);
         }
       });
-      
+
+      // Refresh session countdown immediately after pull-to-refresh
+      updateSessionTimers();
+
       setTimeout(() => {
         hideRefreshIndicator();
         refreshIndicator.style.borderTopColor = 'var(--accent)';
