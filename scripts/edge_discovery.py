@@ -10,9 +10,9 @@ OUT_DIR = DATA_ROOT / "edge_discovery"
 OUT_DIR.mkdir(exist_ok=True)
 
 SETUP_RULES = {
-    "H1_MOMENTUM": {"min_score": 70, "direction": "LONG", "tf": "H1"},
-    "H4_REVERSION": {"min_score": 65, "direction": "LONG", "tf": "H4"},
-    "H4_BREAKOUT": {"min_score": 75, "direction": "LONG", "tf": "H4"},
+    "H1_MOMENTUM": {"min_score": 58, "direction": "LONG", "tf": "H1"},
+    "H4_REVERSION": {"min_score": 52, "direction": "LONG", "tf": "H4"},
+    "H4_BREAKOUT": {"min_score": 60, "direction": "LONG", "tf": "H4"},
 }
 
 FWD_WINDOWS = {"5m": 5, "15m": 15, "30m": 30}  # minutes
@@ -44,7 +44,7 @@ def label_setups(confluence_df: pd.DataFrame, m12_df: pd.DataFrame) -> pd.DataFr
         
         # Calculate forward returns
         fwd_returns = {}
-        for name, minutes in FWD_WINDOWS.items():
+        for name, minutes in [("fwd_return_5m", 5), ("fwd_return_15m", 15), ("fwd_return_30m", 30)]:
             fwd_idx = idx + pd.Timedelta(minutes=minutes)
             # Find closest future index
             future_idx = m12_df.index[m12_df.index >= fwd_idx]

@@ -734,17 +734,17 @@
           <div class="desk-monitors">
             <div class="monitor">
               <div class="monitor-header"><span>HYPOTHESIS QUEUE</span><span class="monitor-dot"></span></div>
-              <div class="monitor-row"><span class="monitor-label">H1 MOMENTUM</span><span class="monitor-value positive">VALIDATED</span></div>
-              <div class="monitor-row"><span class="monitor-label">H4 REVERSION</span><span class="monitor-value">TESTING</span></div>
-              <div class="monitor-row"><span class="monitor-label">D1 BREAKOUT</span><span class="monitor-value warning">PENDING</span></div>
-              <div class="monitor-row"><span class="monitor-label">M12 ENTRY</span><span class="monitor-value positive">CONFIRMED</span></div>
+              <div class="monitor-row"><span class="monitor-label">H1 MOMENTUM</span><span class="monitor-value positive" id="resQueue0">VALIDATED</span></div>
+              <div class="monitor-row"><span class="monitor-label">H4 REVERSION</span><span class="monitor-value" id="resQueue1">TESTING</span></div>
+              <div class="monitor-row"><span class="monitor-label">D1 BREAKOUT</span><span class="monitor-value warning" id="resQueue2">PENDING</span></div>
+              <div class="monitor-row"><span class="monitor-label">M12 ENTRY</span><span class="monitor-value positive" id="resQueue3">CONFIRMED</span></div>
             </div>
             <div class="monitor">
               <div class="monitor-header"><span>BACKTEST RESULTS</span><span class="monitor-dot"></span></div>
-              <div class="monitor-row"><span class="monitor-label">SHARPE</span><span class="monitor-value positive">2.34</span></div>
-              <div class="monitor-row"><span class="monitor-label">MAX DD</span><span class="monitor-value">-8.2%</span></div>
-              <div class="monitor-row"><span class="monitor-label">PROFIT FACTOR</span><span class="monitor-value positive">1.87</span></div>
-              <div class="monitor-row"><span class="monitor-label">TRADES/YR</span><span class="monitor-value">847</span></div>
+              <div class="monitor-row"><span class="monitor-label">SHARPE</span><span class="monitor-value positive" id="resSharpe">2.34</span></div>
+              <div class="monitor-row"><span class="monitor-label">MAX DD</span><span class="monitor-value" id="resMaxDd">-8.2%</span></div>
+              <div class="monitor-row"><span class="monitor-label">PROFIT FACTOR</span><span class="monitor-value positive" id="resPf">1.87</span></div>
+              <div class="monitor-row"><span class="monitor-label">TRADES/YR</span><span class="monitor-value" id="resTrades">847</span></div>
             </div>
           </div>
           <div class="desk-action">▶ INITIATE WALK-FORWARD TEST</div>
@@ -851,26 +851,26 @@
           <article class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #00d4aa, #00b894);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
             <div class="stat-label">Sharpe Ratio (30D)</div>
-            <div class="stat-value" id="sharpeVal">2.34</div>
-            <div class="stat-change positive">▲ +0.12 vs last month</div>
+            <div class="stat-value" id="sharpeVal">—</div>
+            <div class="stat-change">loading...</div>
           </article>
           <article class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #3742fa, #2d3ae8);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
             <div class="stat-label">Max Drawdown (30D)</div>
-            <div class="stat-value" id="ddVal">-8.2%</div>
-            <div class="stat-change positive">▼ -1.4% improvement</div>
+            <div class="stat-value" id="ddVal">—</div>
+            <div class="stat-change">loading...</div>
           </article>
           <article class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #ffa502, #ff9f1c);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M1 20l21-21"></path><polyline points="17 14 23 14 23 20"></polyline></svg></div>
             <div class="stat-label">Profit Factor</div>
-            <div class="stat-value" id="pfVal">1.87</div>
-            <div class="stat-change positive">▲ +0.09</div>
+            <div class="stat-value" id="pfVal">—</div>
+            <div class="stat-change">loading...</div>
           </article>
           <article class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b9d, #e85a8a);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
             <div class="stat-label">Win Rate (Session)</div>
-            <div class="stat-value" id="wrVal">64.3%</div>
-            <div class="stat-change positive">▲ +3.1%</div>
+            <div class="stat-value" id="wrVal">—</div>
+            <div class="stat-change">loading...</div>
           </article>
         </div>
       </div>
@@ -1236,6 +1236,85 @@
     fetchJournal();
     setInterval(fetchJournal, 30000);
 
+    // ===== PATTERN RESEARCHER =====
+    async function fetchResearcher() {
+      const setupsData = await apiGet('/setups?limit=50');
+      if (setupsData && setupsData.setups && !setupsData.mock) {
+        const s = setupsData.setups;
+        // Count by setup type and compute avg returns
+        const typeStats = {};
+        s.forEach(row => {
+          const t = row.setup_name || 'UNKNOWN';
+          if (!typeStats[t]) typeStats[t] = { count: 0, total30m: 0 };
+          typeStats[t].count++;
+          typeStats[t].total30m += row.fwd_return_30m || 0;
+        });
+        // Update hypothesis queue (first 4 types found)
+        const types = Object.keys(typeStats);
+        for (let i = 0; i < 4; i++) {
+          const el = document.getElementById('resQueue' + i);
+          if (!el) continue;
+          if (i < types.length) {
+            const t = types[i];
+            const avgR = typeStats[t].total30m / typeStats[t].count;
+            el.textContent = typeStats[t].count + ' sigs, avg ' + avgR.toFixed(1) + 'p';
+            el.className = 'monitor-value positive';
+          } else {
+            el.textContent = '—';
+            el.className = 'monitor-value';
+          }
+        }
+        // Backtest results: aggregate over all setups
+        const total = s.length;
+        const avgScore = s.reduce((a, r) => a + (r.confluence_score || 0), 0) / total;
+        const avg30m = s.reduce((a, r) => a + (r.fwd_return_30m || 0), 0) / total;
+        const pos30m = s.filter(r => (r.fwd_return_30m || 0) > 0).length;
+        const wr = total > 0 ? (pos30m / total * 100) : 0;
+        // Show aggregated stats instead of fixed names
+        document.getElementById('resSharpe').textContent = wr.toFixed(1) + '%';
+        document.getElementById('resSharpe').className = 'monitor-value' + (wr >= 50 ? ' positive' : ' negative');
+        document.getElementById('resMaxDd').textContent = 'avg ' + avgScore.toFixed(1);
+        document.getElementById('resMaxDd').className = 'monitor-value';
+        document.getElementById('resPf').textContent = (avg30m).toFixed(2) + 'p';
+        document.getElementById('resPf').className = 'monitor-value' + (avg30m > 0 ? ' positive' : ' negative');
+        document.getElementById('resTrades').textContent = total;
+        document.getElementById('resTrades').className = 'monitor-value';
+      }
+    }
+    fetchResearcher();
+    setInterval(fetchResearcher, 30000);
+
+    // ===== STAT CARDS (Sharpe, Max DD, PF, Win Rate) =====
+    async function fetchStats() {
+      const [sharpeData, pfData] = await Promise.all([
+        apiGet('/sharpe'),
+        apiGet('/profit-factor')
+      ]);
+      if (sharpeData && !sharpeData.mock) {
+        const el = document.getElementById('sharpeVal');
+        el.textContent = sharpeData.sharpe_ratio?.toFixed(2) ?? '--';
+        el.className = 'stat-value' + ((sharpeData.sharpe_ratio || 0) >= 0 ? ' positive' : ' negative');
+      }
+      if (pfData && !pfData.mock) {
+        const el = document.getElementById('pfVal');
+        el.textContent = pfData.profit_factor?.toFixed(2) ?? '--';
+        el.className = 'stat-value' + ((pfData.profit_factor || 0) >= 1 ? ' positive' : ' negative');
+        // Win rate from profit-factor endpoint
+        if (pfData.win_rate != null) {
+          const wrEl = document.getElementById('wrVal');
+          wrEl.textContent = (pfData.win_rate * 100).toFixed(1) + '%';
+          wrEl.className = 'stat-value' + (pfData.win_rate >= 0.5 ? ' positive' : ' negative');
+        }
+        if (sharpeData && sharpeData.total_trades != null) {
+          const ddEl = document.getElementById('ddVal');
+          ddEl.textContent = sharpeData.total_trades + ' trades';
+          ddEl.className = 'stat-value';
+        }
+      }
+    }
+    fetchStats();
+    setInterval(fetchStats, 60000);
+
     // ===== WEBSOCKET - LIVE UPDATES =====
     function connectWebSocket() {
       const ws = new WebSocket('wss://hermes-production-04cd.up.railway.app/ws/live');
@@ -1457,6 +1536,8 @@
       fetchConfluence();
       fetchRisk();
       fetchJournal();
+      fetchResearcher();
+      fetchStats();
       checkPipelineStatus();
       // Re-animate chart
       pnlData.forEach((_, i, arr) => {

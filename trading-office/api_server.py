@@ -362,8 +362,21 @@ async def get_confluence(_: bool = Depends(verify_api_key)):
 
 @app.get("/api/v1/setups")
 async def get_setups(limit: int = 50, _: bool = Depends(verify_api_key)):
-    path = DATA_ROOT / "edge_discovery" / "XAUUSD_setup_labels.parquet"
-    df = read_parquet_safe(path)
+    # Try R2 first
+    df = None
+    if r2_client:
+        try:
+            import io
+            response = r2_client.get_object(Bucket=R2_BUCKET, Key="edge_discovery/XAUUSD_setup_labels.parquet")
+            body = response["Body"].read()
+            df = pd.read_parquet(io.BytesIO(body))
+        except Exception:
+            pass
+
+    # Fallback to local
+    if df is None or df.empty:
+        path = DATA_ROOT / "edge_discovery" / "XAUUSD_setup_labels.parquet"
+        df = read_parquet_safe(path)
 
     if df is None or df.empty:
         return {
